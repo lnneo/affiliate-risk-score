@@ -1,191 +1,174 @@
-import Database from 'better-sqlite3';
-import path from 'path';
+import { createClient, type Client, type InValue, type ResultSet } from '@libsql/client';
 import fs from 'fs';
-import os from 'os';
+import path from 'path';
 
-// Detect Vercel / AWS Lambda / Serverless environment where process.cwd() is read-only (/var/task)
-const isServerless = Boolean(process.env.VERCEL) || (process.env.NODE_ENV === 'production' && !process.env.LOCAL_DB);
+import { defaultRuleStatements, defaultSeedStatements, schemaStatements, type SqlStatement } from './db-schema';
 
-// Use /tmp directory on Vercel/serverless environments, otherwise local ./data
-const dataDir = isServerless ? path.join(os.tmpdir(), 'linkpul_data') : path.join(process.cwd(), 'data');
-const dbPath = path.join(dataDir, 'affiliate_fraud.db');
+type SqlPrimitive = string | number | bigint | ArrayBuffer | Uint8Array | null;
+type QueryArgs = ReadonlyArray<SqlPrimitive | boolean | undefined>;
 
-if (!fs.existsSync(dataDir)) {
-  try {
-    fs.mkdirSync(dataDir, { recursive: true });
-  } catch (err) {
-    console.warn('Warning: Could not create data directory:', err);
-  }
+const useTurso = process.env.NODE_ENV === 'production' && Boolean(process.env.TURSO_DATABASE_URL) && !process.env.LOCAL_DB;
+const isTestEnv = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
+const localDataDir = path.join(process.cwd(), 'data');
+const localDbPath = path.join(localDataDir, 'affiliate_fraud.db');
+const localDbUrl = `file:${localDbPath}`;
+
+if (!useTurso && !fs.existsSync(localDataDir)) {
+  fs.mkdirSync(localDataDir, { recursive: true });
 }
 
-export const db = new Database(dbPath);
+function createDbClient(): Client {
+  if (useTurso) {
+    const url = process.env.TURSO_DATABASE_URL;
+    const authToken = process.env.TURSO_AUTH_TOKEN;
 
-// Enable WAL mode locally, or fallback to DELETE in serverless envs
-try {
-  if (isServerless) {
-    db.pragma('journal_mode = DELETE');
-  } else {
-    db.pragma('journal_mode = WAL');
-  }
-} catch (err) {
-  console.warn('Warning: Could not set journal mode:', err);
-}
-
-export function initDatabase() {
-  db.exec(`
-    CREATE TABLE IF NOT EXISTS device_fingerprints (
-      id TEXT PRIMARY KEY,
-      fingerprint_hash TEXT NOT NULL,
-      browser TEXT,
-      browser_version TEXT,
-      os TEXT,
-      timezone TEXT,
-      language TEXT,
-      screen TEXT,
-      canvas_hash TEXT,
-      webgl_hash TEXT,
-      audio_hash TEXT,
-      fonts_hash TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS affiliate_profiles (
-      affiliate_id TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      email TEXT NOT NULL,
-      payment_account TEXT NOT NULL,
-      registered_ip TEXT,
-      registered_fingerprint_hash TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS affiliate_clicks (
-      id TEXT PRIMARY KEY,
-      affiliate_id TEXT NOT NULL,
-      cookie_id TEXT NOT NULL,
-      session_id TEXT NOT NULL,
-      fingerprint_id TEXT,
-      ip TEXT NOT NULL,
-      country TEXT DEFAULT 'US',
-      is_vpn INTEGER DEFAULT 0,
-      is_datacenter INTEGER DEFAULT 0,
-      referrer TEXT,
-      landing_url TEXT,
-      clicked_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (fingerprint_id) REFERENCES device_fingerprints(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS orders (
-      id TEXT PRIMARY KEY,
-      user_id TEXT NOT NULL,
-      user_email TEXT NOT NULL,
-      payment_account TEXT NOT NULL,
-      affiliate_id TEXT NOT NULL,
-      amount REAL NOT NULL,
-      cookie_id TEXT,
-      fingerprint_id TEXT,
-      ip TEXT NOT NULL,
-      country TEXT DEFAULT 'US',
-      external_customer_id TEXT,
-      is_vpn INTEGER DEFAULT 0,
-      is_datacenter INTEGER DEFAULT 0,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-
-    CREATE TABLE IF NOT EXISTS affiliate_risk_scores (
-      id TEXT PRIMARY KEY,
-      order_id TEXT NOT NULL,
-      user_id TEXT NOT NULL,
-      affiliate_id TEXT NOT NULL,
-      total_score INTEGER NOT NULL,
-      decision TEXT NOT NULL,
-      review_status TEXT DEFAULT 'UNREVIEWED',
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (order_id) REFERENCES orders(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS affiliate_risk_signals (
-      id TEXT PRIMARY KEY,
-      risk_score_id TEXT NOT NULL,
-      signal_type TEXT NOT NULL,
-      score INTEGER NOT NULL,
-      reason TEXT NOT NULL,
-      metadata_json TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-      FOREIGN KEY (risk_score_id) REFERENCES affiliate_risk_scores(id)
-    );
-
-    CREATE TABLE IF NOT EXISTS rule_configs (
-      id TEXT PRIMARY KEY,
-      rule_type TEXT UNIQUE NOT NULL,
-      score_weight INTEGER NOT NULL,
-      enabled INTEGER DEFAULT 1,
-      description TEXT
-    );
-
-    CREATE TABLE IF NOT EXISTS blacklisted_attributes (
-      id TEXT PRIMARY KEY,
-      type TEXT NOT NULL, -- 'IP' | 'DOMAIN' | 'EMAIL'
-      value TEXT UNIQUE NOT NULL,
-      reason TEXT,
-      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-    );
-  `);
-
-  // Migrate columns for existing orders table if needed
-  try {
-    const tableInfo = db.prepare("PRAGMA table_info('orders')").all() as any[];
-    const hasCountry = tableInfo.some((col) => col.name === 'country');
-    const hasExternalCustomerId = tableInfo.some((col) => col.name === 'external_customer_id');
-
-    if (!hasCountry) {
-      db.exec("ALTER TABLE orders ADD COLUMN country TEXT DEFAULT 'US'");
+    if (!url || !authToken) {
+      throw new Error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN for production Turso database access');
     }
-    if (!hasExternalCustomerId) {
-      db.exec("ALTER TABLE orders ADD COLUMN external_customer_id TEXT");
-    }
-  } catch (err) {
-    console.error('Migration error:', err);
+
+    return createClient({ url, authToken });
   }
 
-  // Insert default affiliate profile for aff_john_doe (idempotent; safe for concurrent init)
-  db.prepare(`
-    INSERT OR IGNORE INTO affiliate_profiles (affiliate_id, name, email, payment_account, registered_ip, registered_fingerprint_hash)
-    VALUES ('aff_john_doe', 'John Doe (Affiliate)', 'john_doe@affiliate.com', 'paypal_john_doe@affiliate.com', '118.69.182.10', 'fp_john_macbook_m2')
-  `).run();
+  return createClient({ url: localDbUrl });
+}
 
-  // Insert default blacklisted values for demo (idempotent; safe for concurrent init)
-  db.prepare(`INSERT OR IGNORE INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_1', 'IP', '198.51.100.99', 'Known Click Farm Node')`).run();
-  db.prepare(`INSERT OR IGNORE INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_2', 'DOMAIN', 'spam-ad-network.biz', 'Referral Spam Network')`).run();
+const client = createDbClient();
+let localSchemaInitPromise: Promise<void> | null = null;
+let startupInitPromise: Promise<void> | null = null;
 
-  // Ensure default rules cover 100% Tapfiliate feature set
-  const defaultRules = [
-    { type: 'SELF_REFERRAL', weight: 100, desc: 'Affiliate email matches buyer email or account' },
-    { type: 'SAME_PAYMENT_ACCOUNT', weight: 100, desc: 'Buyer uses affiliate payment account' },
-    { type: 'SAME_COOKIE', weight: 100, desc: 'Buyer cookie matches affiliate creation session' },
-    { type: 'SAME_FINGERPRINT', weight: 70, desc: 'Buyer device fingerprint matches affiliate device' },
-    { type: 'SAME_IP', weight: 35, desc: 'Buyer IP address matches affiliate click IP' },
-    { type: 'DISPOSABLE_EMAIL', weight: 30, desc: 'Buyer uses disposable or temporary email domain' },
-    { type: 'VPN_USAGE', weight: 20, desc: 'Buyer or click IP detected as commercial VPN' },
-    { type: 'PROXY_USAGE', weight: 20, desc: 'Buyer or click IP detected as proxy' },
-    { type: 'DATACENTER_IP', weight: 20, desc: 'Traffic originates from a datacenter hosting provider' },
-    { type: 'VELOCITY_EXCEEDED', weight: 20, desc: 'High frequency of purchases or clicks in short timeframe' },
-    { type: 'IP_BLACKLISTED', weight: 100, desc: 'IP address is explicitly blacklisted in security database' },
-    { type: 'REFERRER_SPAM_OR_CLOAKED', weight: 30, desc: 'Referrer URL is blacklisted, cloaked, or suspicious' },
-    { type: 'SUSPICIOUS_GEOLOCATION', weight: 30, desc: 'Traffic originates from high-risk or non-target country' },
-    { type: 'CLICK_INFLATION_NO_CONVERSION', weight: 30, desc: 'High click volume from affiliate with abnormally low conversion rate' },
-    { type: 'DUPLICATE_CONVERSION', weight: 100, desc: 'Duplicate customer ID or transaction ID claiming multiple commissions' },
-  ];
+function normalizeArgs(args: QueryArgs = []): InValue[] {
+  return args.map((arg) => {
+    if (typeof arg === 'boolean') {
+      return arg ? 1 : 0;
+    }
 
-  const insertRule = db.prepare(`
-    INSERT OR IGNORE INTO rule_configs (id, rule_type, score_weight, enabled, description)
-    VALUES (?, ?, ?, 1, ?)
-  `);
+    if (typeof arg === 'undefined') {
+      return null;
+    }
 
-  for (const r of defaultRules) {
-    insertRule.run(`rule_${r.type.toLowerCase()}`, r.type, r.weight, r.desc);
+    return arg;
+  }) as InValue[];
+}
+
+function mapRows<T>(result: ResultSet): T[] {
+  return result.rows.map((row) => {
+    const entry = Object.fromEntries(
+      result.columns.map((column, index) => {
+        const value = (row as Record<string, unknown>)[column] ?? (row as unknown as Record<number, unknown>)[index];
+        return [column, value];
+      }),
+    );
+
+    return entry as T;
+  });
+}
+
+async function executeStatement(statement: SqlStatement): Promise<void> {
+  await executeRaw(statement.sql, statement.args);
+}
+
+async function executeRaw(sql: string, args: QueryArgs = []): Promise<ResultSet> {
+  return client.execute({ sql, args: normalizeArgs(args) });
+}
+
+async function queryManyRaw<T>(sql: string, args: QueryArgs = []): Promise<T[]> {
+  const result = await executeRaw(sql, args);
+  return mapRows<T>(result);
+}
+
+async function ensureLocalSchemaInitialized(): Promise<void> {
+  if (useTurso) {
+    return;
+  }
+
+  if (!localSchemaInitPromise) {
+    localSchemaInitPromise = (async () => {
+      for (const statement of schemaStatements) {
+        await executeStatement(statement);
+      }
+
+      const orderColumns = await queryManyRaw<{ name: string }>("PRAGMA table_info('orders')");
+      const hasCountry = orderColumns.some((column) => column.name === 'country');
+      const hasExternalCustomerId = orderColumns.some((column) => column.name === 'external_customer_id');
+
+      if (!hasCountry) {
+        await executeRaw("ALTER TABLE orders ADD COLUMN country TEXT DEFAULT 'US'");
+      }
+
+      if (!hasExternalCustomerId) {
+        await executeRaw('ALTER TABLE orders ADD COLUMN external_customer_id TEXT');
+      }
+    })();
+  }
+
+  await localSchemaInitPromise;
+}
+
+async function ensureDefaultData(): Promise<void> {
+  for (const statement of defaultSeedStatements) {
+    await executeStatement(statement);
+  }
+
+  for (const statement of defaultRuleStatements) {
+    await executeStatement(statement);
   }
 }
 
-// Auto init on load
-initDatabase();
+async function ensureDatabaseReady(): Promise<void> {
+  if (!useTurso) {
+    await (startupInitPromise ?? ensureLocalSchemaInitialized());
+  }
+}
+
+export async function execute(sql: string, args: QueryArgs = []): Promise<ResultSet> {
+  await ensureDatabaseReady();
+  return executeRaw(sql, args);
+}
+
+export async function queryMany<T>(sql: string, args: QueryArgs = []): Promise<T[]> {
+  const result = await execute(sql, args);
+  return mapRows<T>(result);
+}
+
+export async function queryOne<T>(sql: string, args: QueryArgs = []): Promise<T | null> {
+  const rows = await queryMany<T>(sql, args);
+  return rows[0] ?? null;
+}
+
+export async function initDatabase(): Promise<void> {
+  if (useTurso) {
+    return;
+  }
+
+  await ensureLocalSchemaInitialized();
+  await ensureDefaultData();
+}
+
+export function isUsingTurso(): boolean {
+  return useTurso;
+}
+
+export function getLocalDbUrl(): string {
+  return localDbUrl;
+}
+
+export function getTursoConnectionConfig(): { url: string; authToken: string } {
+  const url = process.env.TURSO_DATABASE_URL;
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+
+  if (!url || !authToken) {
+    throw new Error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
+  }
+
+  return { url, authToken };
+}
+
+export const db = {
+  execute,
+  queryMany,
+  queryOne,
+};
+
+if (!useTurso && !isTestEnv) {
+  startupInitPromise = initDatabase();
+}

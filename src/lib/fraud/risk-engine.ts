@@ -1,4 +1,4 @@
-import { db } from '../db';
+import { execute, queryMany, queryOne } from '../db';
 import { evaluateIdentityRules } from './rules/identity';
 import { evaluateNetworkRules } from './rules/network';
 import { evaluateBehaviorRules } from './rules/behavior';
@@ -8,7 +8,12 @@ import { randomUUID } from 'crypto';
 
 export async function evaluateOrderRisk(order: OrderContext): Promise<RiskEvaluationResult> {
   // 1. Fetch active rule configurations from database
-  const dbRules = db.prepare('SELECT * FROM rule_configs').all() as any[];
+  const dbRules = await queryMany<{
+    rule_type: string;
+    score_weight: number;
+    enabled: number;
+    description: string;
+  }>('SELECT * FROM rule_configs');
   const ruleConfigs = new Map<string, RuleConfig>();
   
   for (const r of dbRules) {
@@ -49,18 +54,21 @@ export async function evaluateOrderRisk(order: OrderContext): Promise<RiskEvalua
   const riskScoreId = `risk_${randomUUID()}`;
 
   // 5. Persist order if not already in DB
-  const existingOrder = db.prepare('SELECT id FROM orders WHERE id = ?').get(order.orderId);
+  const existingOrder = await queryOne<{ id: string }>('SELECT id FROM orders WHERE id = ?', [order.orderId]);
   if (!existingOrder) {
     let fingerprintDbId: string | null = null;
     if (order.fingerprintHash) {
-      const fp = db.prepare('SELECT id FROM device_fingerprints WHERE fingerprint_hash = ?').get(order.fingerprintHash) as any;
+      const fp = await queryOne<{ id: string }>(
+        'SELECT id FROM device_fingerprints WHERE fingerprint_hash = ?',
+        [order.fingerprintHash],
+      );
       if (fp) fingerprintDbId = fp.id;
     }
 
-    db.prepare(`
+    await execute(`
       INSERT INTO orders (id, user_id, user_email, payment_account, affiliate_id, amount, cookie_id, fingerprint_id, ip, country, external_customer_id, is_vpn, is_datacenter, created_at)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `, [
       order.orderId,
       order.userId,
       order.userEmail,
@@ -74,37 +82,38 @@ export async function evaluateOrderRisk(order: OrderContext): Promise<RiskEvalua
       order.externalCustomerId || null,
       order.isVpn ? 1 : 0,
       order.isDatacenter ? 1 : 0,
-      order.createdAt || new Date().toISOString()
-    );
+      order.createdAt || new Date().toISOString(),
+    ]);
   }
 
   // 6. Persist risk score decision
-  db.prepare(`
+  await execute(`
     INSERT INTO affiliate_risk_scores (id, order_id, user_id, affiliate_id, total_score, decision, review_status, created_at)
     VALUES (?, ?, ?, ?, ?, ?, 'UNREVIEWED', CURRENT_TIMESTAMP)
-  `).run(
+  `, [
     riskScoreId,
     order.orderId,
     order.userId,
     order.affiliateId,
     totalScore,
-    decision
-  );
+    decision,
+  ]);
 
   // 7. Persist individual signals (Explainable Audit Log)
-  const insertSignal = db.prepare(`
-    INSERT INTO affiliate_risk_signals (id, risk_score_id, signal_type, score, reason, metadata_json, created_at)
-    VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-  `);
-
   for (const sig of allSignals) {
-    insertSignal.run(
-      `sig_${randomUUID()}`,
-      riskScoreId,
-      sig.type,
-      sig.score,
-      sig.reason,
-      sig.metadata ? JSON.stringify(sig.metadata) : null
+    await execute(
+      `
+        INSERT INTO affiliate_risk_signals (id, risk_score_id, signal_type, score, reason, metadata_json, created_at)
+        VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+      `,
+      [
+        `sig_${randomUUID()}`,
+        riskScoreId,
+        sig.type,
+        sig.score,
+        sig.reason,
+        sig.metadata ? JSON.stringify(sig.metadata) : null,
+      ],
     );
   }
 

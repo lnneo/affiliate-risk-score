@@ -1,21 +1,22 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { evaluateOrderRisk } from '../risk-engine';
-import { db } from '../../db';
+import { execute, initDatabase } from '../../db';
 
 describe('Affiliate Risk Score Engine - Dynamic IP Blacklist & 100% Tapfiliate Coverage', () => {
-  beforeEach(() => {
-    db.prepare('DELETE FROM affiliate_risk_signals').run();
-    db.prepare('DELETE FROM affiliate_risk_scores').run();
-    db.prepare('DELETE FROM orders').run();
-    db.prepare('DELETE FROM affiliate_clicks').run();
-    db.prepare('DELETE FROM device_fingerprints').run();
-    db.prepare('DELETE FROM blacklisted_attributes').run();
+  beforeEach(async () => {
+    await initDatabase();
+    await execute('DELETE FROM affiliate_risk_signals');
+    await execute('DELETE FROM affiliate_risk_scores');
+    await execute('DELETE FROM orders');
+    await execute('DELETE FROM affiliate_clicks');
+    await execute('DELETE FROM device_fingerprints');
+    await execute('DELETE FROM blacklisted_attributes');
 
     // Seed default blacklisted items including dynamic wildcard IP patterns
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_exact', 'IP', '198.51.100.99', 'Exact IP Blacklist')`).run();
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_wildcard_subnet', 'IP', '192.168.100.*', 'Subnet Wildcard Blacklist')`).run();
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_wildcard_broad', 'IP', '10.200.*.*', 'Broad Range Wildcard Blacklist')`).run();
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_domain', 'DOMAIN', 'spam-ad-network.biz', 'Referral Spam Network')`).run();
+    await execute(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_exact', 'IP', '198.51.100.99', 'Exact IP Blacklist')`);
+    await execute(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_wildcard_subnet', 'IP', '192.168.100.*', 'Subnet Wildcard Blacklist')`);
+    await execute(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_wildcard_broad', 'IP', '10.200.*.*', 'Broad Range Wildcard Blacklist')`);
+    await execute(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_domain', 'DOMAIN', 'spam-ad-network.biz', 'Referral Spam Network')`);
   });
 
   it('should APPROVE clean legitimate order with score < 40', async () => {

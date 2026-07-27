@@ -1,4 +1,4 @@
-import { db } from '../../db';
+import { queryOne } from '../../db';
 import { FraudSignal, OrderContext, RuleConfig } from '../types';
 
 export async function evaluateNetworkRules(
@@ -14,9 +14,12 @@ export async function evaluateNetworkRules(
   };
 
   // Fetch Affiliate Profile dynamically from DB
-  const affProfile = db.prepare(`
-    SELECT registered_ip, registered_fingerprint_hash FROM affiliate_profiles WHERE affiliate_id = ?
-  `).get(order.affiliateId) as any;
+  const affProfile = await queryOne<{ registered_ip: string | null; registered_fingerprint_hash: string | null }>(
+    `
+      SELECT registered_ip, registered_fingerprint_hash FROM affiliate_profiles WHERE affiliate_id = ?
+    `,
+    [order.affiliateId],
+  );
 
   const affiliateIp = affProfile?.registered_ip;
 
@@ -28,11 +31,14 @@ export async function evaluateNetworkRules(
       (affiliateIp && (order.ip === affiliateIp || order.ip === '127.0.0.1' || order.ip === '::1')) ||
       order.ip === '118.69.182.10';
 
-    const sameIpOrders = db.prepare(`
-      SELECT COUNT(DISTINCT user_id) as user_count 
-      FROM orders 
-      WHERE ip = ? AND affiliate_id = ? AND user_id != ? AND id != ?
-    `).get(order.ip, order.affiliateId, order.userId, order.orderId) as any;
+    const sameIpOrders = await queryOne<{ user_count: number }>(
+      `
+        SELECT COUNT(DISTINCT user_id) as user_count
+        FROM orders
+        WHERE ip = ? AND affiliate_id = ? AND user_id != ? AND id != ?
+      `,
+      [order.ip, order.affiliateId, order.userId, order.orderId],
+    );
 
     if (isAffiliateIp || (sameIpOrders && sameIpOrders.user_count > 0)) {
       signals.push({

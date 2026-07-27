@@ -1,4 +1,4 @@
-import { db } from '../../db';
+import { queryOne } from '../../db';
 import { FraudSignal, OrderContext, RuleConfig } from '../types';
 
 const DISPOSABLE_DOMAINS = [
@@ -24,9 +24,17 @@ export async function evaluateIdentityRules(
   };
 
   // Fetch Affiliate Profile dynamically from DB
-  const affProfile = db.prepare(`
-    SELECT * FROM affiliate_profiles WHERE affiliate_id = ?
-  `).get(order.affiliateId) as any;
+  const affProfile = await queryOne<{
+    email: string;
+    payment_account: string;
+    registered_fingerprint_hash: string;
+    registered_ip: string | null;
+  }>(
+    `
+      SELECT * FROM affiliate_profiles WHERE affiliate_id = ?
+    `,
+    [order.affiliateId],
+  );
 
   const affiliateEmail = affProfile?.email || 'john_doe@affiliate.com';
   const affiliatePayment = affProfile?.payment_account || 'paypal_john_doe@affiliate.com';
@@ -52,10 +60,13 @@ export async function evaluateIdentityRules(
   // 2. Same Payment Account
   const paymentWeight = getWeight('SAME_PAYMENT_ACCOUNT', 100);
   if (order.paymentAccount && paymentWeight > 0) {
-    const previousPaymentMatch = db.prepare(`
-      SELECT id, affiliate_id, user_email FROM orders 
-      WHERE payment_account = ? AND (affiliate_id = ? OR user_id = ?) AND id != ?
-    `).get(order.paymentAccount, order.userEmail, order.affiliateId, order.orderId) as any;
+    const previousPaymentMatch = await queryOne<{ id: string; affiliate_id: string; user_email: string }>(
+      `
+        SELECT id, affiliate_id, user_email FROM orders
+        WHERE payment_account = ? AND (affiliate_id = ? OR user_id = ?) AND id != ?
+      `,
+      [order.paymentAccount, order.userEmail, order.affiliateId, order.orderId],
+    );
 
     const isAffiliatePayment = order.paymentAccount.toLowerCase() === affiliatePayment.toLowerCase();
 
@@ -74,11 +85,14 @@ export async function evaluateIdentityRules(
   if (order.cookieId && cookieWeight > 0) {
     const isAffiliateMasterCookie = order.cookieId.includes(order.affiliateId) || order.cookieId.includes('master');
 
-    const multipleUserMatch = db.prepare(`
-      SELECT COUNT(DISTINCT user_id) as user_count 
-      FROM orders 
-      WHERE cookie_id = ? AND user_id != ? AND id != ?
-    `).get(order.cookieId, order.userId, order.orderId) as any;
+    const multipleUserMatch = await queryOne<{ user_count: number }>(
+      `
+        SELECT COUNT(DISTINCT user_id) as user_count
+        FROM orders
+        WHERE cookie_id = ? AND user_id != ? AND id != ?
+      `,
+      [order.cookieId, order.userId, order.orderId],
+    );
 
     if (isAffiliateMasterCookie || (multipleUserMatch && multipleUserMatch.user_count > 0)) {
       signals.push({
@@ -98,12 +112,15 @@ export async function evaluateIdentityRules(
       order.fingerprintHash.includes('john_macbook') ||
       order.fingerprintHash.includes(order.affiliateId);
 
-    const multipleUserOrders = db.prepare(`
-      SELECT COUNT(DISTINCT o.user_id) as user_count 
-      FROM orders o
-      JOIN device_fingerprints df ON o.fingerprint_id = df.id
-      WHERE df.fingerprint_hash = ? AND o.user_id != ? AND o.id != ?
-    `).get(order.fingerprintHash, order.userId, order.orderId) as any;
+    const multipleUserOrders = await queryOne<{ user_count: number }>(
+      `
+        SELECT COUNT(DISTINCT o.user_id) as user_count
+        FROM orders o
+        JOIN device_fingerprints df ON o.fingerprint_id = df.id
+        WHERE df.fingerprint_hash = ? AND o.user_id != ? AND o.id != ?
+      `,
+      [order.fingerprintHash, order.userId, order.orderId],
+    );
 
     if (isExactFingerprintMatch || (multipleUserOrders && multipleUserOrders.user_count > 0)) {
       signals.push({
@@ -118,13 +135,19 @@ export async function evaluateIdentityRules(
       });
     } else {
       // Check Cross-Browser Hardware Cluster (Same IP + Same OS/Screen/Timezone cluster)
-      const currentFpData = db.prepare(`
-        SELECT os, screen, timezone FROM device_fingerprints WHERE fingerprint_hash = ?
-      `).get(order.fingerprintHash) as any;
+      const currentFpData = await queryOne<{ os: string; screen: string; timezone: string }>(
+        `
+          SELECT os, screen, timezone FROM device_fingerprints WHERE fingerprint_hash = ?
+        `,
+        [order.fingerprintHash],
+      );
 
-      const affiliateFpData = db.prepare(`
-        SELECT os, screen, timezone FROM device_fingerprints WHERE fingerprint_hash = ?
-      `).get(affiliateFpHash) as any;
+      const affiliateFpData = await queryOne<{ os: string; screen: string; timezone: string }>(
+        `
+          SELECT os, screen, timezone FROM device_fingerprints WHERE fingerprint_hash = ?
+        `,
+        [affiliateFpHash],
+      );
 
       const isSameIpAsAffiliate = affiliateIp && (order.ip === affiliateIp || order.ip === '127.0.0.1' || order.ip === '::1');
 

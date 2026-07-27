@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { execute, queryOne } from '@/lib/db';
 import { randomUUID } from 'crypto';
 
 export async function POST(req: Request) {
@@ -28,15 +28,18 @@ export async function POST(req: Request) {
 
     if (fingerprintHash) {
       // Find or create device fingerprint
-      const existingFp = db.prepare('SELECT id FROM device_fingerprints WHERE fingerprint_hash = ?').get(fingerprintHash) as any;
+      const existingFp = await queryOne<{ id: string }>(
+        'SELECT id FROM device_fingerprints WHERE fingerprint_hash = ?',
+        [fingerprintHash],
+      );
       if (existingFp) {
         fingerprintDbId = existingFp.id;
       } else {
         fingerprintDbId = `fp_${randomUUID()}`;
-        db.prepare(`
+        await execute(`
           INSERT INTO device_fingerprints (id, fingerprint_hash, browser, browser_version, os, timezone, language, screen, canvas_hash, webgl_hash, audio_hash, fonts_hash)
           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `).run(
+        `, [
           fingerprintDbId,
           fingerprintHash,
           fingerprintDetails.browser || 'Browser',
@@ -48,16 +51,16 @@ export async function POST(req: Request) {
           fingerprintDetails.canvasHash || 'cv_default',
           fingerprintDetails.webglHash || 'gl_default',
           fingerprintDetails.audioHash || 'au_default',
-          fingerprintDetails.fontsHash || 'ft_default'
-        );
+          fingerprintDetails.fontsHash || 'ft_default',
+        ]);
       }
     }
 
     const clickId = `clk_${randomUUID()}`;
-    db.prepare(`
+    await execute(`
       INSERT INTO affiliate_clicks (id, affiliate_id, cookie_id, session_id, fingerprint_id, ip, is_vpn, is_datacenter, referrer, landing_url)
       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `).run(
+    `, [
       clickId,
       affiliateId,
       cookieId,
@@ -67,8 +70,8 @@ export async function POST(req: Request) {
       isVpn ? 1 : 0,
       isDatacenter ? 1 : 0,
       referrer,
-      landingUrl
-    );
+      landingUrl,
+    ]);
 
     return NextResponse.json({
       success: true,

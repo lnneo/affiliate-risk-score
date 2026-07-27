@@ -41,6 +41,12 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
 
+      - name: Bootstrap Turso Production Schema
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: set -a && source .vercel/.env.production.local && set +a && pnpm db:turso:bootstrap
+
       - name: Build Vercel Artifacts
         env:
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}

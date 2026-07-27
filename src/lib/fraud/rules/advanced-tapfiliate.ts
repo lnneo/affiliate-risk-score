@@ -1,12 +1,14 @@
-import { db } from '../../db';
+import { queryMany, queryOne } from '../../db';
 import { FraudSignal, OrderContext, RuleConfig } from '../types';
 
 const HIGH_RISK_COUNTRIES = ['KP', 'RU', 'IR', 'BY', 'SY'];
 
 // Helper to check if an IP matches exact IP or dynamic wildcard pattern (e.g. 198.51.100.* or 198.51.*.*)
-function checkIpBlacklist(clientIp: string): { isBlacklisted: boolean; matchedPattern?: string; reason?: string } | null {
+async function checkIpBlacklist(clientIp: string): Promise<{ isBlacklisted: boolean; matchedPattern?: string; reason?: string } | null> {
   if (!clientIp) return null;
-  const blacklistedIps = db.prepare(`SELECT value, reason FROM blacklisted_attributes WHERE type = 'IP'`).all() as any[];
+  const blacklistedIps = await queryMany<{ value: string; reason: string | null }>(
+    `SELECT value, reason FROM blacklisted_attributes WHERE type = 'IP'`,
+  );
 
   for (const item of blacklistedIps) {
     const pattern = item.value.trim();
@@ -15,10 +17,10 @@ function checkIpBlacklist(clientIp: string): { isBlacklisted: boolean; matchedPa
       const regexStr = '^' + pattern.split('.').map((part: string) => (part === '*' ? '\\d+' : part)).join('\\.') + '$';
       const regex = new RegExp(regexStr);
       if (regex.test(clientIp)) {
-        return { isBlacklisted: true, matchedPattern: item.value, reason: item.reason };
+        return { isBlacklisted: true, matchedPattern: item.value, reason: item.reason ?? undefined };
       }
     } else if (pattern === clientIp) {
-      return { isBlacklisted: true, matchedPattern: item.value, reason: item.reason };
+      return { isBlacklisted: true, matchedPattern: item.value, reason: item.reason ?? undefined };
     }
   }
 
@@ -40,7 +42,7 @@ export async function evaluateAdvancedTapfiliateRules(
   // 1. Dynamic IP Blacklisting Rule (Supports Wildcards like 198.51.100.* or 198.51.*.*)
   const ipBlacklistWeight = getWeight('IP_BLACKLISTED', 100);
   if (order.ip && ipBlacklistWeight > 0) {
-    const blacklistMatch = checkIpBlacklist(order.ip);
+    const blacklistMatch = await checkIpBlacklist(order.ip);
 
     if (blacklistMatch?.isBlacklisted) {
       signals.push({
@@ -58,9 +60,12 @@ export async function evaluateAdvancedTapfiliateRules(
     const referrerStr = order.referrer.toLowerCase();
     
     // Check if referrer domain is blacklisted
-    const blacklistedDomain = db.prepare(`
-      SELECT value, reason FROM blacklisted_attributes WHERE type = 'DOMAIN' AND ? LIKE '%' || value || '%'
-    `).get(referrerStr) as any;
+    const blacklistedDomain = await queryOne<{ value: string; reason: string }>(
+      `
+        SELECT value, reason FROM blacklisted_attributes WHERE type = 'DOMAIN' AND ? LIKE '%' || value || '%'
+      `,
+      [referrerStr],
+    );
 
     if (blacklistedDomain) {
       signals.push({
@@ -95,15 +100,21 @@ export async function evaluateAdvancedTapfiliateRules(
   // 4. Click Inflation / Zero-Conversion Click Spam Rule
   const clickInflationWeight = getWeight('CLICK_INFLATION_NO_CONVERSION', 30);
   if (clickInflationWeight > 0) {
-    const clicksLast24h = db.prepare(`
-      SELECT COUNT(*) as count FROM affiliate_clicks 
-      WHERE affiliate_id = ? AND datetime(clicked_at) >= datetime('now', '-24 hours')
-    `).get(order.affiliateId) as { count: number };
+    const clicksLast24h = await queryOne<{ count: number }>(
+      `
+        SELECT COUNT(*) as count FROM affiliate_clicks
+        WHERE affiliate_id = ? AND datetime(clicked_at) >= datetime('now', '-24 hours')
+      `,
+      [order.affiliateId],
+    );
 
-    const ordersLast24h = db.prepare(`
-      SELECT COUNT(*) as count FROM orders 
-      WHERE affiliate_id = ? AND datetime(created_at) >= datetime('now', '-24 hours')
-    `).get(order.affiliateId) as { count: number };
+    const ordersLast24h = await queryOne<{ count: number }>(
+      `
+        SELECT COUNT(*) as count FROM orders
+        WHERE affiliate_id = ? AND datetime(created_at) >= datetime('now', '-24 hours')
+      `,
+      [order.affiliateId],
+    );
 
     if (clicksLast24h && clicksLast24h.count >= 50 && (ordersLast24h?.count || 0) === 0) {
       signals.push({
@@ -118,10 +129,13 @@ export async function evaluateAdvancedTapfiliateRules(
   // 5. Duplicate Conversion Check (customer_id / external_id)
   const duplicateWeight = getWeight('DUPLICATE_CONVERSION', 100);
   if (order.externalCustomerId && duplicateWeight > 0) {
-    const existingConversion = db.prepare(`
-      SELECT id, affiliate_id, created_at FROM orders 
-      WHERE external_customer_id = ? AND id != ?
-    `).get(order.externalCustomerId, order.orderId) as any;
+    const existingConversion = await queryOne<{ id: string; affiliate_id: string; created_at: string }>(
+      `
+        SELECT id, affiliate_id, created_at FROM orders
+        WHERE external_customer_id = ? AND id != ?
+      `,
+      [order.externalCustomerId, order.orderId],
+    );
 
     if (existingConversion) {
       signals.push({
