@@ -1,7 +1,7 @@
 # LinkPul Affiliate Risk Score Engine - Feature History Ledger
 
 ## Feature Summary
-Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị liên kết **LinkPul** bao phủ 100% tiêu chuẩn Tapfiliate Enterprise Anti-Fraud Specs với 15 thuật toán phát hiện gian lận đa tín hiệu, hỗ trợ IP đen động wildcard (`192.168.100.*`), đối soát phần cứng đa trình duyệt, trang thử nghiệm thiết bị thật, giao diện Quản trị Admin và chuẩn hóa nút bấm thành Động từ ngắn gọn.
+Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị liên kết **LinkPul** bao phủ 100% tiêu chuẩn Tapfiliate Enterprise Anti-Fraud Specs với 15 thuật toán phát hiện gian lận đa tín hiệu, hỗ trợ IP đen động wildcard (`192.168.100.*`), đối soát phần cứng đa trình duyệt, trang thử nghiệm thiết bị thật, giao diện Quản trị Admin, chuẩn hóa nút bấm thành Động từ ngắn gọn, và thiết lập cấu hình pnpm & ràng buộc phiên bản Node SDK tương thích SQLite 3.53.3 (`better-sqlite3` ^13.0.1).
 
 - **Source Branch**: `main`
 - **Target Branch**: `main`
@@ -24,19 +24,24 @@ Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị li�
    - **Summary**: `style: update button labels across all pages to concise action verbs`
    - **Modules Changed**: Navbar logo & button, Simulator, Admin Audit Ledger, Admin Config, Real Referral, Landing Page, Store Checkout.
 
-4. **Commit Hash**: `LEDGER` (Final Feature History Commit)
+4. **Commit Hash**: `37a544b`
+   - **Summary**: `chore: switch commands to pnpm and set Node.js engine constraint (>=20.0.0) for SQLite 3.53.3 compatibility`
+   - **Modules Changed**: `package.json`, `.nvmrc`, `.ai/handoffs/linkpul-affiliate-risk-score.md`.
+
+5. **Commit Hash**: `LEDGER` (Final Feature History Commit)
    - **Summary**: `docs: update feature history and AI handoff for LinkPul risk score engine`
    - **Modules Changed**: `.ai/handoffs/linkpul-affiliate-risk-score.md`, `.ai/feature-history/linkpul-affiliate-risk-score.md`
 
 ---
 
 ## Verification Performed
-- `npx vitest run`: Passed 5/5 test suites.
-- `npm run build`: Production build completed cleanly with Next.js Turbopack.
-- Dev server verified at `http://localhost:3000`.
+- `pnpm test`: Passed 5/5 test suites.
+- `pnpm build`: Production build completed cleanly with Next.js Turbopack.
+- SQLite version verified: `3.53.3` via `better-sqlite3` ^13.0.1.
+- Node.js SDK constraint: `>=20.0.0` (active Node version `v24.13.0`).
 
 ---
 
 ## Rollback & Cherry-Pick Notes
-- Order of cherry-pick: Apply `ca9de02`, `b51995a`, `d06a3e1` in sequence.
+- Order of cherry-pick: Apply `ca9de02`, `b51995a`, `d06a3e1`, `37a544b` in sequence.
 - SQLite WAL database files (`data/affiliate_fraud.db*`) will be initialized automatically upon app startup via `initDatabase()`.
