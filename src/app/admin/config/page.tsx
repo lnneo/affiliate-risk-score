@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import TableOverlay from '@/components/TableOverlay';
 import { useI18n } from '@/i18n/I18nProvider';
+import { replaceCount } from '@/i18n/format';
 import { Sliders, RefreshCw, Power, Ban, Plus, Trash2 } from 'lucide-react';
 
 export default function AdminConfigPage() {
@@ -134,24 +135,24 @@ export default function AdminConfigPage() {
         {/* Threshold Reference Card */}
         <div className="glass-card p-5 rounded-2xl border border-slate-800 space-y-3 min-w-0">
           <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400">
-            Bảng Tham Chiếu Ngưỡng Quyết Định Hoa Hồng (Decision Thresholds)
+            {t.config.thresholdsTitle}
           </h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs font-mono min-w-0">
             <div className="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <span className="font-bold text-emerald-400 block font-sans">DUYỆT (APPROVE)</span>
-              <span className="text-slate-400 text-[11px]">Tổng điểm &lt; 40 điểm</span>
+              <span className="font-bold text-emerald-400 block font-sans">{t.config.approveThreshold}</span>
+              <span className="text-slate-400 text-[11px]">{t.config.approveRange}</span>
             </div>
             <div className="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
-              <span className="font-bold text-blue-400 block font-sans">TẠM GIỮ (PENDING)</span>
-              <span className="text-slate-400 text-[11px]">Tổng điểm 40 – 69 điểm</span>
+              <span className="font-bold text-blue-400 block font-sans">{t.config.pendingThreshold}</span>
+              <span className="text-slate-400 text-[11px]">{t.config.pendingRange}</span>
             </div>
             <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
-              <span className="font-bold text-amber-400 block font-sans">KIỂM TRA THỦ CÔNG</span>
-              <span className="text-slate-400 text-[11px]">Tổng điểm 70 – 99 điểm</span>
+              <span className="font-bold text-amber-400 block font-sans">{t.config.manualThreshold}</span>
+              <span className="text-slate-400 text-[11px]">{t.config.manualRange}</span>
             </div>
             <div className="p-3 rounded-xl bg-rose-500/10 border border-rose-500/20">
-              <span className="font-bold text-rose-400 block font-sans">TỪ CHỐI (REJECT)</span>
-              <span className="text-slate-400 text-[11px]">Tổng điểm &ge; 100 điểm</span>
+              <span className="font-bold text-rose-400 block font-sans">{t.config.rejectThreshold}</span>
+              <span className="text-slate-400 text-[11px]">{t.config.rejectRange}</span>
             </div>
           </div>
         </div>
@@ -160,9 +161,9 @@ export default function AdminConfigPage() {
         <div className="glass-card p-6 rounded-2xl border border-rose-500/30 space-y-5 bg-rose-950/10 min-w-0">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3 min-w-0">
             <h3 className="text-sm font-bold uppercase tracking-wider text-rose-400 flex items-center gap-2">
-              <Ban className="h-4 w-4 shrink-0" /> Quản lý Danh Sách Đen Bảo Mật (Attribute Blacklist)
+              <Ban className="h-4 w-4 shrink-0" /> {t.config.blacklistTitle}
             </h3>
-            <span className="text-[11px] text-slate-400 font-mono shrink-0">Đã thêm: {blacklists.length} mục</span>
+            <span className="text-[11px] text-slate-400 font-mono shrink-0">{replaceCount(t.config.blacklistCount, blacklists.length)}</span>
           </div>
 
           {/* Add Blacklist Form */}
@@ -172,20 +173,20 @@ export default function AdminConfigPage() {
               onChange={(e: any) => setNewType(e.target.value)}
               className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-indigo-500 focus:outline-none"
             >
-              <option value="IP">Địa chỉ IP (IP)</option>
-              <option value="DOMAIN">Tên miền (Domain)</option>
-              <option value="EMAIL">Email (Email)</option>
+              <option value="IP">{t.config.typeIp}</option>
+              <option value="DOMAIN">{t.config.typeDomain}</option>
+              <option value="EMAIL">{t.config.typeEmail}</option>
             </select>
             <input
               type="text"
-              placeholder="Giá trị (VD: 198.51.100.99 hoặc spam-domain.biz)"
+              placeholder={t.config.valuePlaceholder}
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
               className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-indigo-500 focus:outline-none break-all"
             />
             <input
               type="text"
-              placeholder="Lý do chặn (VD: Click farm node)"
+              placeholder={t.config.reasonPlaceholder}
               value={newReason}
               onChange={(e) => setNewReason(e.target.value)}
               className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-indigo-500 focus:outline-none break-words"
@@ -193,12 +194,12 @@ export default function AdminConfigPage() {
             <LoadingButton
               onClick={handleAddBlacklist}
               loading={addingBlacklist}
-              loadingText="Đang thêm..."
+              loadingText={t.config.addingBtn}
               icon={<Plus className="h-4 w-4 shrink-0" />}
               disabled={!newValue.trim()}
               className="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/30 transition-all disabled:opacity-50 shrink-0"
             >
-              Thêm
+              {t.config.addBtn}
             </LoadingButton>
           </div>
 
@@ -208,16 +209,16 @@ export default function AdminConfigPage() {
               <table className="w-full text-left text-xs font-mono min-w-[500px]">
               <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px]">
                 <tr>
-                  <th className="px-3 py-2">Loại</th>
-                  <th className="px-3 py-2">Giá trị Blacklist</th>
-                  <th className="px-3 py-2">Lý do chặn</th>
-                  <th className="px-3 py-2 text-right">Xóa</th>
+                  <th className="px-3 py-2">{t.config.blacklistTableType}</th>
+                  <th className="px-3 py-2">{t.config.blacklistTableValue}</th>
+                  <th className="px-3 py-2">{t.config.blacklistTableReason}</th>
+                  <th className="px-3 py-2 text-right">{t.config.blacklistTableDelete}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-300">
                 {blacklists.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-3 py-4 text-center text-slate-500">Chưa có giá trị blacklist nào.</td>
+                    <td colSpan={4} className="px-3 py-4 text-center text-slate-500">{t.config.noBlacklist}</td>
                   </tr>
                 ) : (
                   blacklists.map((item) => (
@@ -228,17 +229,17 @@ export default function AdminConfigPage() {
                         </span>
                       </td>
                       <td className="px-3 py-2 font-bold text-slate-200 break-all max-w-[200px]">{item.value}</td>
-                      <td className="px-3 py-2 text-slate-400 font-sans text-xs break-words max-w-[250px]">{item.reason || 'N/A'}</td>
+                      <td className="px-3 py-2 text-slate-400 font-sans text-xs break-words max-w-[250px]">{item.reason || t.common.nA}</td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">
                         <LoadingButton
                           onClick={() => handleDeleteBlacklist(item.id)}
                           loading={deletingBlacklistId === item.id}
-                          loadingText="Đang xóa..."
+                          loadingText={t.config.deletingBtn}
                           icon={<Trash2 className="h-3.5 w-3.5 shrink-0" />}
                           disabled={Boolean(deletingBlacklistId)}
                           className="text-rose-400 hover:text-rose-300 p-1 font-medium flex items-center justify-end gap-1 ml-auto disabled:opacity-50"
                         >
-                          Xóa
+                          {t.config.deleteBtn}
                         </LoadingButton>
                       </td>
                     </tr>
@@ -270,7 +271,7 @@ export default function AdminConfigPage() {
                   <LoadingButton
                     onClick={() => handleUpdateRule(rule.rule_type, rule.score_weight, !isEnabled)}
                     loading={savingRule === rule.rule_type}
-                    loadingText={isEnabled ? 'Đang tắt...' : 'Đang bật...'}
+                    loadingText={isEnabled ? t.config.disablingBtn : t.config.enablingBtn}
                     icon={<Power className="h-3 w-3 shrink-0" />}
                     disabled={Boolean(savingRule)}
                     className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all shrink-0 disabled:opacity-50 ${
@@ -279,7 +280,7 @@ export default function AdminConfigPage() {
                         : 'bg-slate-800 text-slate-500 border-slate-700'
                     }`}
                   >
-                    {isEnabled ? 'Bật' : 'Tắt'}
+                    {isEnabled ? t.config.enableBtn : t.config.disableBtn}
                   </LoadingButton>
                 </div>
 
@@ -287,7 +288,7 @@ export default function AdminConfigPage() {
 
                 <div className="flex items-center justify-between gap-4 pt-2">
                   <div className="flex-1 space-y-1 min-w-0">
-                    <label className="text-[11px] font-semibold text-slate-400 block truncate">Trọng số Điểm Cộng (+Points)</label>
+                    <label className="text-[11px] font-semibold text-slate-400 block truncate">{t.config.pointsLabel}</label>
                     <input
                       type="range"
                       min="0"
