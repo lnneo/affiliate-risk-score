@@ -7,10 +7,16 @@ import { defaultRuleStatements, defaultSeedStatements, schemaStatements, type Sq
 type SqlPrimitive = string | number | bigint | ArrayBuffer | Uint8Array | null;
 type QueryArgs = ReadonlyArray<SqlPrimitive | boolean | undefined>;
 
-const useTurso = process.env.NODE_ENV === 'production' && Boolean(process.env.TURSO_DATABASE_URL) && !process.env.LOCAL_DB;
 const isTestEnv = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
+const forceLocalDb = Boolean(process.env.LOCAL_DB) || isTestEnv;
+const useTurso =
+  !forceLocalDb &&
+  process.env.NODE_ENV === 'production' &&
+  Boolean(process.env.TURSO_DATABASE_URL);
 const localDataDir = path.join(process.cwd(), 'data');
-const localDbPath = path.join(localDataDir, 'affiliate_fraud.db');
+const localDbPath = isTestEnv
+  ? path.join(localDataDir, `affiliate_fraud.test-${process.env.VITEST_WORKER_ID ?? '0'}.db`)
+  : path.join(localDataDir, 'affiliate_fraud.db');
 const localDbUrl = `file:${localDbPath}`;
 
 if (!useTurso && !fs.existsSync(localDataDir)) {
@@ -18,6 +24,10 @@ if (!useTurso && !fs.existsSync(localDataDir)) {
 }
 
 function createDbClient(): Client {
+  if (isTestEnv) {
+    return createClient({ url: localDbUrl });
+  }
+
   if (useTurso) {
     const url = process.env.TURSO_DATABASE_URL;
     const authToken = process.env.TURSO_AUTH_TOKEN;
@@ -35,6 +45,16 @@ function createDbClient(): Client {
 const client = createDbClient();
 let localSchemaInitPromise: Promise<void> | null = null;
 let startupInitPromise: Promise<void> | null = null;
+let localDbLock: Promise<void> = Promise.resolve();
+
+async function withLocalDbLock<T>(operation: () => Promise<T>): Promise<T> {
+  const result = localDbLock.then(operation, operation);
+  localDbLock = result.then(
+    () => undefined,
+    () => undefined,
+  );
+  return result;
+}
 
 function normalizeArgs(args: QueryArgs = []): InValue[] {
   return args.map((arg) => {
@@ -83,6 +103,8 @@ async function ensureLocalSchemaInitialized(): Promise<void> {
 
   if (!localSchemaInitPromise) {
     localSchemaInitPromise = (async () => {
+      await executeRaw('PRAGMA busy_timeout = 5000');
+
       for (const statement of schemaStatements) {
         await executeStatement(statement);
       }
@@ -140,12 +162,18 @@ export async function initDatabase(): Promise<void> {
     return;
   }
 
-  await ensureLocalSchemaInitialized();
-  await ensureDefaultData();
+  await withLocalDbLock(async () => {
+    await ensureLocalSchemaInitialized();
+    await ensureDefaultData();
+  });
 }
 
 export function isUsingTurso(): boolean {
   return useTurso;
+}
+
+export function isUsingLocalSqlite(): boolean {
+  return !useTurso;
 }
 
 export function getLocalDbUrl(): string {
