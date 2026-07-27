@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import LoadingButton from '@/components/LoadingButton';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { 
   Share2, 
@@ -126,14 +127,16 @@ export default function ReferralGeneratorPage() {
               <span className="text-[11px] text-slate-400 block font-mono break-all">
                 Fingerprint máy bạn: <span className="text-indigo-400 font-bold">{myFingerprint || 'Đang quét...'}</span>
               </span>
-              <button
+              <LoadingButton
                 onClick={handleRegisterDeviceAsAffiliate}
-                disabled={registering || !myFingerprint}
+                loading={registering}
+                loadingText="Đang đăng ký..."
+                icon={<Fingerprint className="h-4 w-4 text-amber-400 shrink-0" />}
+                disabled={!myFingerprint}
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 max-w-full"
               >
-                <Fingerprint className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="break-words">{registering ? 'Đang đăng ký...' : 'Đăng ký thiết bị'}</span>
-              </button>
+                Đăng ký thiết bị
+              </LoadingButton>
               {registeredMsg && (
                 <div className="text-xs text-emerald-400 font-medium flex items-center justify-start md:justify-end gap-1 break-words">
                   <CheckCircle2 className="h-3.5 w-3.5 shrink-0" /> <span className="break-all">{registeredMsg}</span>

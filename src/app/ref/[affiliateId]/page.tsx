@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from 'react';
 import Navbar from '@/components/Navbar';
+import LoadingButton from '@/components/LoadingButton';
 import { useRouter } from 'next/navigation';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { RefreshCw, CheckCircle2, ArrowRight } from 'lucide-react';
@@ -12,8 +13,14 @@ export default function RealReferralLandingPage({ params }: { params: Promise<{ 
   const router = useRouter();
 
   const [loading, setLoading] = useState(true);
+  const [navigating, setNavigating] = useState(false);
   const [clickResult, setClickResult] = useState<any>(null);
   const [realFingerprint, setRealFingerprint] = useState<string>('');
+
+  const goToStore = () => {
+    setNavigating(true);
+    router.push(`/store?affiliateId=${affiliateId}&cookieId=${clickResult?.cookieId}&fp=${realFingerprint}`);
+  };
 
   useEffect(() => {
     async function captureAndTrack() {
@@ -106,12 +113,15 @@ export default function RealReferralLandingPage({ params }: { params: Promise<{ 
             </div>
 
             <div className="pt-2 min-w-0">
-              <button
-                onClick={() => router.push(`/store?affiliateId=${affiliateId}&cookieId=${clickResult?.cookieId}&fp=${realFingerprint}`)}
-                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 font-bold text-white shadow-lg shadow-emerald-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2"
+              <LoadingButton
+                onClick={goToStore}
+                loading={navigating}
+                loadingText="Đang chuyển..."
+                icon={<ArrowRight className="h-4 w-4 shrink-0" />}
+                className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 font-bold text-white shadow-lg shadow-emerald-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <span>Chuyển đến cửa hàng</span> <ArrowRight className="h-4 w-4 shrink-0" />
-              </button>
+                Chuyển đến cửa hàng
+              </LoadingButton>
             </div>
           </div>
         )}

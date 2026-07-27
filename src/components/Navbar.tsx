@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ShieldAlert, PlayCircle, LayoutDashboard, Sliders, Sparkles, Share2, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
+import LoadingButton from '@/components/LoadingButton';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -84,15 +85,16 @@ export default function Navbar() {
               {seedMsg}
             </span>
           )}
-          <button
+          <LoadingButton
             onClick={handleSeedData}
-            disabled={seeding}
+            loading={seeding}
+            loadingText="Đang nạp..."
+            icon={<Sparkles className="h-3.5 w-3.5 text-amber-400 shrink-0" />}
             className="flex items-center gap-2 rounded-lg bg-slate-800 border border-slate-700/80 px-3.5 py-2 text-xs font-medium text-slate-200 shadow-sm transition-all hover:bg-slate-700 hover:border-slate-600 active:scale-95 disabled:opacity-50"
             title="Nạp dữ liệu thử nghiệm mẫu"
           >
-            <Sparkles className={`h-3.5 w-3.5 text-amber-400 ${seeding ? 'animate-spin' : ''}`} />
-            {seeding ? 'Đang nạp...' : 'Nạp dữ liệu'}
-          </button>
+            Nạp dữ liệu
+          </LoadingButton>
         </div>
       </div>
     </header>
