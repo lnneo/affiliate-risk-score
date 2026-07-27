@@ -4,9 +4,11 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import TableOverlay from '@/components/TableOverlay';
+import { useI18n } from '@/i18n/I18nProvider';
 import { Sliders, RefreshCw, Power, Ban, Plus, Trash2 } from 'lucide-react';
 
 export default function AdminConfigPage() {
+  const { t } = useI18n();
   const [rules, setRules] = useState<any[]>([]);
   const [blacklists, setBlacklists] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -112,10 +114,10 @@ export default function AdminConfigPage() {
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2 break-words">
               <Sliders className="h-6 w-6 text-indigo-400 shrink-0" />
-              Cấu hình 15 Quy tắc & Danh sách Đen (Blacklist Manager)
+              {t.config.title}
             </h1>
             <p className="text-xs text-slate-400 break-words">
-              Điều chỉnh trọng số 15 thuật toán Tapfiliate Enterprise và quản lý Danh sách đen IP/Domain rủi ro cao.
+              {t.config.description}
             </p>
           </div>
 
@@ -125,7 +127,7 @@ export default function AdminConfigPage() {
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0 disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Đang tải...' : 'Làm mới'}
+            {loading ? t.common.refreshing : t.common.refresh}
           </button>
         </div>
 
@@ -201,7 +203,7 @@ export default function AdminConfigPage() {
           </div>
 
           {/* Blacklist Table */}
-          <TableOverlay loading={loading} label="Đang tải danh sách đen...">
+          <TableOverlay loading={loading} label={t.config.loadingOverlay}>
             <div className="overflow-x-auto max-w-full">
               <table className="w-full text-left text-xs font-mono min-w-[500px]">
               <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px]">

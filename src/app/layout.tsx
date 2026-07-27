@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { I18nProvider } from "@/i18n/I18nProvider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -13,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LinkPul Risk Score - Hệ thống Phát hiện Gian lận Affiliate",
-  description: "Hệ thống tính điểm rủi ro và phát hiện gian lận tiếp thị liên kết LinkPul (Affiliate Fraud Risk Scoring Engine)",
+  title: "LinkPul Risk Score - Affiliate Fraud Detection",
+  description: "LinkPul Affiliate Fraud Risk Scoring Engine",
 };
 
 export default function RootLayout({
@@ -24,10 +25,12 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="vi"
+      lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <I18nProvider>{children}</I18nProvider>
+      </body>
     </html>
   );
 }

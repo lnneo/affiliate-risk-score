@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import TableOverlay from '@/components/TableOverlay';
+import { useI18n } from '@/i18n/I18nProvider';
 import { 
   Filter, 
   RefreshCw, 
@@ -24,6 +25,7 @@ const AFFILIATE_PROMOTER = {
 };
 
 export default function AdminDashboardPage() {
+  const { t } = useI18n();
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterDecision, setFilterDecision] = useState('ALL');
@@ -89,10 +91,10 @@ export default function AdminDashboardPage() {
           <div className="min-w-0">
             <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2 break-words">
               <Layers className="h-6 w-6 text-indigo-400 shrink-0" />
-              Nhật ký Audit Điểm Rủi ro Affiliate (Admin Ledger)
+              {t.dashboard.title}
             </h1>
             <p className="text-xs text-slate-400 break-words">
-              Đối soát toàn bộ giao dịch được đánh giá, soi chi tiết các tín hiệu gian lận và thực hiện ghi đè quyết định duyệt/từ chối hoa hồng.
+              {t.dashboard.description}
             </p>
           </div>
 
@@ -102,7 +104,7 @@ export default function AdminDashboardPage() {
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0 disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            {loading ? 'Đang tải...' : 'Làm mới'}
+            {loading ? t.common.refreshing : t.common.refresh}
           </button>
         </div>
 
@@ -158,7 +160,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Risk Scores Table */}
-        <TableOverlay loading={loading} label="Đang tải nhật ký audit...">
+        <TableOverlay loading={loading} label={t.dashboard.loadingOverlay}>
           <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden max-w-full">
             <div className="overflow-x-auto max-w-full">
               <table className="w-full text-left text-xs min-w-[700px]">
