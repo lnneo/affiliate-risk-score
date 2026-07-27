@@ -9,7 +9,7 @@ type TableOverlayProps = {
   label?: string;
 };
 
-export default function TableOverlay({ loading, children, label = 'Đang tải dữ liệu...' }: TableOverlayProps) {
+export default function TableOverlay({ loading, children, label = '' }: TableOverlayProps) {
   return (
     <div className="relative min-h-[280px]">
       {children}
@@ -20,7 +20,7 @@ export default function TableOverlay({ loading, children, label = 'Đang tải d
           aria-live="polite"
         >
           <RefreshCw className="h-8 w-8 animate-spin text-indigo-400" />
-          <span className="text-xs font-medium text-slate-300">{label}</span>
+          {label ? <span className="text-xs font-medium text-slate-300">{label}</span> : null}
         </div>
       ) : null}
     </div>

@@ -17,26 +17,34 @@ export type SimulatorFormData = {
 };
 
 export type SimulatorScenario = {
-  id: string;
+  id:
+    | 'approve_clean'
+    | 'pending_same_ip_vpn'
+    | 'pending_disposable_vpn'
+    | 'pending_referrer_spam'
+    | 'pending_geo_vpn'
+    | 'pending_ip_disposable'
+    | 'manual_same_fingerprint'
+    | 'manual_ip_datacenter_vpn'
+    | 'manual_geo_referrer_vpn'
+    | 'reject_self_referral'
+    | 'reject_blacklisted_ip'
+    | 'reject_duplicate_conversion'
+    | 'reject_same_cookie';
   decision: SimulatorDecision;
-  name: string;
   primaryRule: string;
   ruleTypes: string[];
-  expectedScore: string;
-  description: string;
   form: SimulatorFormData;
 };
 
 export const DECISION_STATES: Array<{
   key: SimulatorDecision;
-  label: string;
-  scoreRange: string;
   color: 'emerald' | 'blue' | 'amber' | 'rose';
 }> = [
-  { key: 'APPROVE', label: 'Đã duyệt', scoreRange: '< 40', color: 'emerald' },
-  { key: 'PENDING_REVIEW', label: 'Tạm giữ', scoreRange: '40 – 69', color: 'blue' },
-  { key: 'MANUAL_REVIEW', label: 'Cần kiểm tra', scoreRange: '70 – 99', color: 'amber' },
-  { key: 'REJECT', label: 'Từ chối', scoreRange: '≥ 100', color: 'rose' },
+  { key: 'APPROVE', color: 'emerald' },
+  { key: 'PENDING_REVIEW', color: 'blue' },
+  { key: 'MANUAL_REVIEW', color: 'amber' },
+  { key: 'REJECT', color: 'rose' },
 ];
 
 const BUYER_IP = '24.180.12.99';
@@ -84,33 +92,22 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'approve_clean',
     decision: 'APPROVE',
-    name: 'Giao dịch sạch',
     primaryRule: 'CLEAN',
     ruleTypes: ['CLEAN'],
-    expectedScore: '0 điểm',
-    description: 'Không kích hoạt rule gian lận nào.',
     form: createScenarioForm('approve_clean'),
   },
   {
     id: 'pending_same_ip_vpn',
     decision: 'PENDING_REVIEW',
-    name: 'Trùng IP + VPN',
     primaryRule: 'SAME_IP',
     ruleTypes: ['SAME_IP', 'VPN_USAGE'],
-    expectedScore: '55 điểm',
-    description: 'Chỉ kích hoạt SAME_IP và VPN_USAGE.',
-    form: createScenarioForm('pending_same_ip_vpn', {
-      isVpn: true,
-    }),
+    form: createScenarioForm('pending_same_ip_vpn', { isVpn: true }),
   },
   {
     id: 'pending_disposable_vpn',
     decision: 'PENDING_REVIEW',
-    name: 'Email rác + VPN',
     primaryRule: 'DISPOSABLE_EMAIL',
     ruleTypes: ['DISPOSABLE_EMAIL', 'VPN_USAGE'],
-    expectedScore: '50 điểm',
-    description: 'Chỉ kích hoạt DISPOSABLE_EMAIL và VPN_USAGE.',
     form: createScenarioForm('pending_disposable_vpn', {
       userEmail: 'buyer.temp@mailinator.com',
       isVpn: true,
@@ -119,11 +116,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'pending_referrer_spam',
     decision: 'PENDING_REVIEW',
-    name: 'Referrer spam + VPN',
     primaryRule: 'REFERRER_SPAM_OR_CLOAKED',
     ruleTypes: ['REFERRER_SPAM_OR_CLOAKED', 'VPN_USAGE'],
-    expectedScore: '50 điểm',
-    description: 'Chỉ kích hoạt REFERRER_SPAM_OR_CLOAKED và VPN_USAGE.',
     form: createScenarioForm('pending_referrer_spam', {
       referrer: 'https://spam-ad-network.biz/redirect',
       isVpn: true,
@@ -132,11 +126,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'pending_geo_vpn',
     decision: 'PENDING_REVIEW',
-    name: 'Geo rủi ro + VPN',
     primaryRule: 'SUSPICIOUS_GEOLOCATION',
     ruleTypes: ['SUSPICIOUS_GEOLOCATION', 'VPN_USAGE'],
-    expectedScore: '50 điểm',
-    description: 'Chỉ kích hoạt SUSPICIOUS_GEOLOCATION và VPN_USAGE.',
     form: createScenarioForm('pending_geo_vpn', {
       country: 'RU',
       isVpn: true,
@@ -145,11 +136,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'pending_ip_disposable',
     decision: 'PENDING_REVIEW',
-    name: 'Trùng IP + Email rác',
     primaryRule: 'SAME_IP',
     ruleTypes: ['SAME_IP', 'DISPOSABLE_EMAIL'],
-    expectedScore: '65 điểm',
-    description: 'Chỉ kích hoạt SAME_IP và DISPOSABLE_EMAIL.',
     form: createScenarioForm('pending_ip_disposable', {
       userEmail: 'risk.buyer@guerrillamail.com',
     }),
@@ -157,11 +145,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'manual_same_fingerprint',
     decision: 'MANUAL_REVIEW',
-    name: 'Trùng vân tay thiết bị',
     primaryRule: 'SAME_FINGERPRINT',
     ruleTypes: ['SAME_FINGERPRINT'],
-    expectedScore: '70 điểm',
-    description: 'Chỉ kích hoạt SAME_FINGERPRINT.',
     form: createScenarioForm('manual_same_fingerprint', {
       fingerprintHash: 'fp_john_macbook_m2',
     }),
@@ -169,11 +154,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'manual_ip_datacenter_vpn',
     decision: 'MANUAL_REVIEW',
-    name: 'Trùng IP + Datacenter + VPN',
     primaryRule: 'SAME_IP',
     ruleTypes: ['SAME_IP', 'DATACENTER_IP', 'VPN_USAGE'],
-    expectedScore: '75 điểm',
-    description: 'Chỉ kích hoạt SAME_IP, DATACENTER_IP và VPN_USAGE.',
     form: createScenarioForm('manual_ip_datacenter_vpn', {
       isDatacenter: true,
       isVpn: true,
@@ -182,11 +164,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'manual_geo_referrer_vpn',
     decision: 'MANUAL_REVIEW',
-    name: 'Geo + Referrer spam + VPN',
     primaryRule: 'SUSPICIOUS_GEOLOCATION',
     ruleTypes: ['SUSPICIOUS_GEOLOCATION', 'REFERRER_SPAM_OR_CLOAKED', 'VPN_USAGE'],
-    expectedScore: '80 điểm',
-    description: 'Chỉ kích hoạt SUSPICIOUS_GEOLOCATION, REFERRER_SPAM_OR_CLOAKED và VPN_USAGE.',
     form: createScenarioForm('manual_geo_referrer_vpn', {
       country: 'IR',
       referrer: 'https://spam-ad-network.biz/redirect',
@@ -196,11 +175,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'reject_self_referral',
     decision: 'REJECT',
-    name: 'Tự giới thiệu',
     primaryRule: 'SELF_REFERRAL',
     ruleTypes: ['SELF_REFERRAL', 'SAME_PAYMENT_ACCOUNT'],
-    expectedScore: '200 điểm',
-    description: 'Kích hoạt SELF_REFERRAL và SAME_PAYMENT_ACCOUNT.',
     form: createScenarioForm('reject_self_referral', {
       userId: 'aff_john_doe',
       userEmail: 'john_doe@affiliate.com',
@@ -211,23 +187,15 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'reject_blacklisted_ip',
     decision: 'REJECT',
-    name: 'IP blacklist',
     primaryRule: 'IP_BLACKLISTED',
     ruleTypes: ['IP_BLACKLISTED'],
-    expectedScore: '100 điểm',
-    description: 'Chỉ kích hoạt IP_BLACKLISTED.',
-    form: createScenarioForm('reject_blacklisted_ip', {
-      amount: 99,
-    }),
+    form: createScenarioForm('reject_blacklisted_ip', { amount: 99 }),
   },
   {
     id: 'reject_duplicate_conversion',
     decision: 'REJECT',
-    name: 'Trùng mã khách hàng',
     primaryRule: 'DUPLICATE_CONVERSION',
     ruleTypes: ['DUPLICATE_CONVERSION'],
-    expectedScore: '100 điểm',
-    description: 'Cần bấm "Nạp dữ liệu" trước để có đơn cust_alice_101 trong CSDL.',
     form: createScenarioForm('reject_duplicate_conversion', {
       externalCustomerId: 'cust_alice_101',
       amount: 199,
@@ -236,11 +204,8 @@ export const SIMULATOR_SCENARIOS: SimulatorScenario[] = [
   {
     id: 'reject_same_cookie',
     decision: 'REJECT',
-    name: 'Trùng cookie affiliate',
     primaryRule: 'SAME_COOKIE',
     ruleTypes: ['SAME_COOKIE'],
-    expectedScore: '100 điểm',
-    description: 'Chỉ kích hoạt SAME_COOKIE.',
     form: createScenarioForm('reject_same_cookie', {
       cookieId: 'ck_aff_john_doe_master',
     }),

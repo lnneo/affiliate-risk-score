@@ -4,6 +4,8 @@ export interface FraudSignal {
   type: string;
   score: number;
   reason: string;
+  reasonKey?: string;
+  reasonParams?: Record<string, string | number>;
   metadata?: Record<string, any>;
 }
 

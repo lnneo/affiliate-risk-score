@@ -44,7 +44,9 @@ export async function evaluateNetworkRules(
       signals.push({
         type: 'SAME_IP',
         score: sameIpWeight,
-        reason: `Địa chỉ IP (${order.ip}) trùng khớp với địa chỉ IP của Affiliate (${affiliateIp || 'IP giới thiệu'})`,
+        reason: `IP address (${order.ip}) matches affiliate IP (${affiliateIp || 'referral IP'})`,
+        reasonKey: 'sameIp',
+        reasonParams: { ip: order.ip, affiliateIp: affiliateIp || 'referral IP' },
         metadata: { ip: order.ip, affiliateIp, relatedUserCount: sameIpOrders?.user_count || 0 },
       });
     }
@@ -56,7 +58,9 @@ export async function evaluateNetworkRules(
     signals.push({
       type: 'VPN_USAGE',
       score: vpnWeight,
-      reason: `Địa chỉ IP (${order.ip}) bị phát hiện là dịch vụ VPN thương mại`,
+      reason: `IP address (${order.ip}) detected as a commercial VPN service`,
+      reasonKey: 'vpnUsage',
+      reasonParams: { ip: order.ip },
       metadata: { ip: order.ip, isVpn: true },
     });
   }
@@ -67,7 +71,9 @@ export async function evaluateNetworkRules(
     signals.push({
       type: 'DATACENTER_IP',
       score: datacenterWeight,
-      reason: `Địa chỉ IP (${order.ip}) thuộc dải máy chủ Cloud Datacenter ASN`,
+      reason: `IP address (${order.ip}) belongs to a cloud datacenter ASN range`,
+      reasonKey: 'datacenterIp',
+      reasonParams: { ip: order.ip },
       metadata: { ip: order.ip, isDatacenter: true },
     });
   }

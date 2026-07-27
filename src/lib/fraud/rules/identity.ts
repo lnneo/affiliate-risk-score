@@ -52,7 +52,9 @@ export async function evaluateIdentityRules(
     signals.push({
       type: 'SELF_REFERRAL',
       score: selfReferralWeight,
-      reason: `Email người mua (${order.userEmail}) trùng với Email người giới thiệu (${affiliateEmail})`,
+      reason: `Buyer email (${order.userEmail}) matches affiliate email (${affiliateEmail})`,
+      reasonKey: 'selfReferral',
+      reasonParams: { buyerEmail: order.userEmail, affiliateEmail },
       metadata: { buyerEmail: order.userEmail, affiliateEmail },
     });
   }
@@ -74,7 +76,9 @@ export async function evaluateIdentityRules(
       signals.push({
         type: 'SAME_PAYMENT_ACCOUNT',
         score: paymentWeight,
-        reason: `Tài khoản thanh toán (${order.paymentAccount}) trùng với tài khoản Affiliate (${affiliatePayment}) hoặc đơn mua tự giới thiệu trước đó`,
+        reason: `Payment account (${order.paymentAccount}) matches affiliate account (${affiliatePayment}) or a prior self-referral order`,
+        reasonKey: 'samePaymentAccount',
+        reasonParams: { paymentAccount: order.paymentAccount, affiliatePayment },
         metadata: { paymentAccount: order.paymentAccount, affiliatePayment },
       });
     }
@@ -95,10 +99,13 @@ export async function evaluateIdentityRules(
     );
 
     if (isAffiliateMasterCookie || (multipleUserMatch && multipleUserMatch.user_count > 0)) {
+      const cookiePreview = `${order.cookieId.slice(0, 15)}...`;
       signals.push({
         type: 'SAME_COOKIE',
         score: cookieWeight,
-        reason: `Cookie trình duyệt (${order.cookieId.slice(0, 15)}...) liên quan đến phiên quản trị Affiliate hoặc dùng chung nhiều tài khoản`,
+        reason: `Browser cookie (${cookiePreview}) is linked to an affiliate admin session or shared across multiple accounts`,
+        reasonKey: 'sameCookie',
+        reasonParams: { cookiePreview },
         metadata: { cookieId: order.cookieId, associatedUsers: multipleUserMatch?.user_count || 0 },
       });
     }
@@ -123,10 +130,14 @@ export async function evaluateIdentityRules(
     );
 
     if (isExactFingerprintMatch || (multipleUserOrders && multipleUserOrders.user_count > 0)) {
+      const fingerprintPreview = `${order.fingerprintHash.slice(0, 15)}...`;
+      const affiliateFpPreview = `${affiliateFpHash.slice(0, 15)}...`;
       signals.push({
         type: 'SAME_FINGERPRINT',
         score: fingerprintWeight,
-        reason: `Vân tay thiết bị (${order.fingerprintHash.slice(0, 15)}...) trùng khớp trực tiếp với thiết bị Affiliate (${affiliateFpHash.slice(0, 15)}...)`,
+        reason: `Device fingerprint (${fingerprintPreview}) directly matches affiliate device (${affiliateFpPreview})`,
+        reasonKey: 'sameFingerprint',
+        reasonParams: { fingerprintPreview, affiliateFpPreview },
         metadata: {
           fingerprintHash: order.fingerprintHash,
           registeredAffiliateFingerprint: affiliateFpHash,
@@ -156,7 +167,9 @@ export async function evaluateIdentityRules(
           signals.push({
             type: 'SAME_FINGERPRINT',
             score: 40,
-            reason: `Phát hiện cụm thiết bị phần cứng trùng lặp (Cùng IP + Cùng OS ${currentFpData.os} + Màn hình ${currentFpData.screen}) giữa trình duyệt mới và máy Affiliate`,
+            reason: `Duplicate hardware cluster detected (same IP + OS ${currentFpData.os} + screen ${currentFpData.screen}) between new browser and affiliate device`,
+            reasonKey: 'hardwareClusterFingerprint',
+            reasonParams: { os: currentFpData.os, screen: currentFpData.screen },
             metadata: {
               fingerprintHash: order.fingerprintHash,
               hardwareCluster: `${currentFpData.os} / ${currentFpData.screen}`,
@@ -175,7 +188,9 @@ export async function evaluateIdentityRules(
       signals.push({
         type: 'DISPOSABLE_EMAIL',
         score: disposableWeight,
-        reason: `Tên miền email (@${domain}) thuộc danh sách nhà cung cấp email rác/tạm thời`,
+        reason: `Email domain (@${domain}) is on the disposable/temporary email provider list`,
+        reasonKey: 'disposableEmail',
+        reasonParams: { domain },
         metadata: { domain },
       });
     }

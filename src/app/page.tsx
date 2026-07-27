@@ -6,6 +6,7 @@ import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
 import { useI18n } from '@/i18n/I18nProvider';
+import { replaceCount, resolveFraudSignalReason } from '@/i18n/format';
 import {
   DECISION_STATES,
   findScenarioById,
@@ -171,28 +172,28 @@ export default function SimulatorPage() {
         return (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold text-base glow-emerald max-w-full">
             <CheckCircle2 className="h-5 w-5 shrink-0" />
-            <span className="break-words">DUYỆT HOA HỒNG (APPROVE - Giao dịch sạch)</span>
+            <span className="break-words">{t.decision.APPROVE.badge}</span>
           </div>
         );
       case 'PENDING_REVIEW':
         return (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/10 border border-blue-500/30 text-blue-400 font-bold text-base max-w-full">
             <Clock className="h-5 w-5 shrink-0" />
-            <span className="break-words">TẠM GIỮ CHỜ DUYỆT (PENDING REVIEW)</span>
+            <span className="break-words">{t.decision.PENDING_REVIEW.badge}</span>
           </div>
         );
       case 'MANUAL_REVIEW':
         return (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold text-base glow-amber max-w-full">
             <AlertTriangle className="h-5 w-5 shrink-0" />
-            <span className="break-words">CẦN KIỂM TRA THỦ CÔNG (MANUAL REVIEW)</span>
+            <span className="break-words">{t.decision.MANUAL_REVIEW.badge}</span>
           </div>
         );
       case 'REJECT':
         return (
           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold text-base glow-rose max-w-full">
             <XCircle className="h-5 w-5 shrink-0" />
-            <span className="break-words">TỪ CHỐI HOA HỒNG (REJECT - Gian lận)</span>
+            <span className="break-words">{t.decision.REJECT.badge}</span>
           </div>
         );
       default:
@@ -240,8 +241,8 @@ export default function SimulatorPage() {
                         : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
-                    {state.label}
-                    <span className="text-slate-500 font-normal"> · {state.scoreRange}</span>
+                    {t.decision[state.key].label}
+                    <span className="text-slate-500 font-normal"> · {t.decision[state.key].scoreRange}</span>
                   </button>
                 );
               })}
@@ -294,13 +295,13 @@ export default function SimulatorPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2 mb-1.5">
-                    <span className="font-semibold text-xs text-slate-100 truncate">{scen.name}</span>
+                    <span className="font-semibold text-xs text-slate-100 truncate">{t.scenarios[scen.id].name}</span>
                     <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${DECISION_BADGE_CLASS[scen.decision]}`}>
-                      {scen.expectedScore}
+                      {t.scenarios[scen.id].expectedScore}
                     </span>
                   </div>
                   <div className="text-[10px] font-mono text-indigo-300 mb-1 break-all">{scen.primaryRule}</div>
-                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed break-words">{scen.description}</p>
+                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed break-words">{t.scenarios[scen.id].description}</p>
                 </button>
               );
             })}
@@ -312,7 +313,7 @@ export default function SimulatorPage() {
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-2">
               <UserCheck className="h-4 w-4 shrink-0" />
-              Hồ sơ Người Giới thiệu Gốc (Affiliate Promoter Reference Profile)
+              {t.simulator.profileTitle}
             </h3>
             <span className="text-[10px] bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 px-2 py-0.5 rounded-full font-mono font-semibold truncate">
               ID: {AFFILIATE_PROMOTER.id}
@@ -321,19 +322,19 @@ export default function SimulatorPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-mono">
             <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 min-w-0">
-              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">Email Affiliate:</span>
+              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">{t.simulator.emailAffiliate}</span>
               <span className="font-bold text-slate-200 break-all">{AFFILIATE_PROMOTER.email}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 min-w-0">
-              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">Tài khoản Thanh toán:</span>
+              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">{t.simulator.paymentAccount}</span>
               <span className="font-bold text-slate-200 break-all">{AFFILIATE_PROMOTER.paymentAccount}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 min-w-0">
-              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">Vân tay Thiết bị:</span>
+              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">{t.simulator.deviceFingerprint}</span>
               <span className="font-bold text-indigo-400 break-all">{AFFILIATE_PROMOTER.deviceFingerprint}</span>
             </div>
             <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 min-w-0">
-              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">IP Đăng ký:</span>
+              <span className="text-[10px] text-slate-400 font-sans block mb-0.5">{t.simulator.registeredIp}</span>
               <span className="font-bold text-slate-200 break-all">{AFFILIATE_PROMOTER.registeredIp}</span>
             </div>
           </div>
@@ -368,7 +369,7 @@ export default function SimulatorPage() {
               <div className="space-y-4 text-xs">
                 <div>
                   <label className="text-slate-400 font-medium flex items-center gap-1.5 mb-1.5">
-                    <Key className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> ID Người giới thiệu (Affiliate ID)
+                    <Key className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.affiliateIdLabel}
                   </label>
                   <input
                     type="text"
@@ -381,11 +382,11 @@ export default function SimulatorPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <label className="text-slate-400 font-medium flex items-center gap-1.5 truncate">
-                      <Mail className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Email Người mua hàng
+                      <Mail className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.buyerEmailLabel}
                     </label>
                     {isEmailMatched && (
                       <span className="text-[10px] text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 flex items-center gap-1 shrink-0">
-                        <AlertCircle className="h-3 w-3" /> Trùng Email Affiliate!
+                        <AlertCircle className="h-3 w-3" /> {t.simulator.emailMatch}
                       </span>
                     )}
                   </div>
@@ -402,11 +403,11 @@ export default function SimulatorPage() {
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-1.5">
                     <label className="text-slate-400 font-medium flex items-center gap-1.5 truncate">
-                      <CreditCard className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Tài khoản Thanh toán (PayPal / Thẻ)
+                      <CreditCard className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.paymentLabel}
                     </label>
                     {isPaymentMatched && (
                       <span className="text-[10px] text-rose-400 font-bold bg-rose-500/10 px-1.5 py-0.5 rounded border border-rose-500/20 flex items-center gap-1 shrink-0">
-                        <AlertCircle className="h-3 w-3" /> Trùng PayPal Affiliate!
+                        <AlertCircle className="h-3 w-3" /> {t.simulator.paymentMatch}
                       </span>
                     )}
                   </div>
@@ -424,11 +425,11 @@ export default function SimulatorPage() {
                   <div>
                     <div className="flex items-center justify-between gap-1 mb-1.5">
                       <label className="text-slate-400 font-medium flex items-center gap-1.5 truncate">
-                        <Globe className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Địa chỉ IP
+                        <Globe className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.ipLabel}
                       </label>
                       {isIpMatched && (
                         <span className="text-[10px] text-amber-400 font-bold bg-amber-500/10 px-1 rounded border border-amber-500/20 shrink-0">
-                          Trùng IP
+                          {t.simulator.ipMatch}
                         </span>
                       )}
                     </div>
@@ -444,7 +445,7 @@ export default function SimulatorPage() {
 
                   <div>
                     <label className="text-slate-400 font-medium flex items-center gap-1.5 mb-1.5">
-                      <Globe className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Quốc gia (ISO)
+                      <Globe className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.countryLabel}
                     </label>
                     <input
                       type="text"
@@ -458,7 +459,7 @@ export default function SimulatorPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label className="text-slate-400 font-medium flex items-center gap-1.5 mb-1.5">
-                      <Laptop className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Vân tay Thiết bị
+                      <Laptop className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.fingerprintLabel}
                     </label>
                     <input
                       type="text"
@@ -470,7 +471,7 @@ export default function SimulatorPage() {
 
                   <div>
                     <label className="text-slate-400 font-medium flex items-center gap-1.5 mb-1.5">
-                      <CopyCheck className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Mã Khách Hàng
+                      <CopyCheck className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.customerIdLabel}
                     </label>
                     <input
                       type="text"
@@ -483,7 +484,7 @@ export default function SimulatorPage() {
 
                 <div>
                   <label className="text-slate-400 font-medium flex items-center gap-1.5 mb-1.5">
-                    <LinkIcon className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> Trang Giới thiệu (Referrer URL)
+                    <LinkIcon className="h-3.5 w-3.5 text-indigo-400 shrink-0" /> {t.simulator.referrerLabel}
                   </label>
                   <input
                     type="text"
@@ -495,7 +496,7 @@ export default function SimulatorPage() {
 
                 {/* Network Intelligence Toggles */}
                 <div className="pt-2 border-t border-slate-800/80 space-y-2">
-                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">Tùy chọn Mạng (Network Intelligence):</span>
+                  <span className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider block">{t.simulator.networkOptions}</span>
                   <div className="flex flex-col gap-2">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -504,7 +505,7 @@ export default function SimulatorPage() {
                         onChange={(e) => setFormData({ ...formData, isVpn: e.target.checked })}
                         className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span className="text-slate-300">Phát hiện địa chỉ VPN thương mại (+20)</span>
+                      <span className="text-slate-300">{t.simulator.vpnOption}</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
@@ -513,7 +514,7 @@ export default function SimulatorPage() {
                         onChange={(e) => setFormData({ ...formData, isDatacenter: e.target.checked })}
                         className="rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500"
                       />
-                      <span className="text-slate-300">IP thuộc Datacenter Cloud (+20)</span>
+                      <span className="text-slate-300">{t.simulator.datacenterOption}</span>
                     </label>
                   </div>
                 </div>
@@ -547,13 +548,13 @@ export default function SimulatorPage() {
               <div className="p-6 space-y-6 animate-fade-in min-w-0 flex-1">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5 min-w-0">
                   <div className="space-y-1 min-w-0 max-w-full">
-                    <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Kết quả Đối soát Risk Engine</span>
+                    <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">{t.simulator.resultTitle}</span>
                     {getDecisionBadge(evaluationResult.decision)}
                   </div>
 
                   <div className="flex items-center gap-4 bg-slate-950/80 p-3 rounded-2xl border border-slate-800 shrink-0">
                     <div className="text-right">
-                      <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">Tổng Điểm Rủi Ro (Score)</span>
+                      <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider block">{t.simulator.totalScore}</span>
                       <span className={`text-3xl font-black ${
                         evaluationResult.totalScore >= 100 ? 'text-rose-400' :
                         evaluationResult.totalScore >= 70 ? 'text-amber-400' :
@@ -569,22 +570,22 @@ export default function SimulatorPage() {
                 {/* Side by side comparison */}
                 <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 min-w-0">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                    <ArrowRightLeft className="h-4 w-4 shrink-0" /> Bảng Đối soát Trực quan: Người Mua vs Người Giới Thiệu
+                    <ArrowRightLeft className="h-4 w-4 shrink-0" /> {t.simulator.comparisonTitle}
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono min-w-0">
                     <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
-                      <span className="text-[10px] font-sans text-slate-400 block font-semibold">Thông tin Người Mua:</span>
-                      <div className="break-all">Email: <span className={isEmailMatched ? 'text-rose-400 font-bold' : 'text-slate-200'}>{formData.userEmail}</span></div>
-                      <div className="break-all">PayPal: <span className={isPaymentMatched ? 'text-rose-400 font-bold' : 'text-slate-200'}>{formData.paymentAccount}</span></div>
-                      <div className="break-all">Fingerprint: <span className={isFingerprintMatched ? 'text-amber-400 font-bold' : 'text-slate-200'}>{formData.fingerprintHash}</span></div>
-                      <div className="break-all">IP: <span className={isIpMatched ? 'text-amber-400 font-bold' : 'text-slate-200'}>{formData.ip}</span></div>
+                      <span className="text-[10px] font-sans text-slate-400 block font-semibold">{t.simulator.buyerInfo}</span>
+                      <div className="break-all">{t.common.email}: <span className={isEmailMatched ? 'text-rose-400 font-bold' : 'text-slate-200'}>{formData.userEmail}</span></div>
+                      <div className="break-all">{t.common.paypal}: <span className={isPaymentMatched ? 'text-rose-400 font-bold' : 'text-slate-200'}>{formData.paymentAccount}</span></div>
+                      <div className="break-all">{t.common.fingerprint}: <span className={isFingerprintMatched ? 'text-amber-400 font-bold' : 'text-slate-200'}>{formData.fingerprintHash}</span></div>
+                      <div className="break-all">{t.common.ip}: <span className={isIpMatched ? 'text-amber-400 font-bold' : 'text-slate-200'}>{formData.ip}</span></div>
                     </div>
                     <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
-                      <span className="text-[10px] font-sans text-indigo-400 block font-semibold">Hồ sơ Affiliate (John Doe):</span>
-                      <div className="break-all">Email: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
-                      <div className="break-all">PayPal: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
-                      <div className="break-all">Fingerprint: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
-                      <div className="break-all">IP: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
+                      <span className="text-[10px] font-sans text-indigo-400 block font-semibold">{t.simulator.affiliateProfile}</span>
+                      <div className="break-all">{t.common.email}: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
+                      <div className="break-all">{t.common.paypal}: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
+                      <div className="break-all">{t.common.fingerprint}: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
+                      <div className="break-all">{t.common.ip}: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
                     </div>
                   </div>
                 </div>
@@ -592,14 +593,14 @@ export default function SimulatorPage() {
                 {/* Signals */}
                 <div className="space-y-3 min-w-0">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-slate-300 flex flex-wrap items-center justify-between gap-2">
-                    <span>Tín hiệu Gian lận Phát hiện ({evaluationResult.signals.length})</span>
-                    <span className="text-[10px] text-slate-500 font-normal">Ngưỡng: &lt;40 Duyệt | 40-69 Tạm giữ | 70-99 Manual | 100+ Từ chối</span>
+                    <span>{replaceCount(t.simulator.signalsTitle, evaluationResult.signals.length)}</span>
+                    <span className="text-[10px] text-slate-500 font-normal">{t.simulator.thresholdHint}</span>
                   </h4>
 
                   {evaluationResult.signals.length === 0 ? (
                     <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
                       <CheckCircle2 className="h-4 w-4 shrink-0" />
-                      <span>Không phát hiện tín hiệu trùng lặp gian lận nào với người giới thiệu. Giao dịch hợp lệ!</span>
+                      <span>{t.simulator.noSignals}</span>
                     </div>
                   ) : (
                     <div className="space-y-2.5 min-w-0">
@@ -613,7 +614,9 @@ export default function SimulatorPage() {
                               <span className="font-bold text-xs text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 shrink-0">
                                 {sig.type}
                               </span>
-                              <span className="text-xs text-slate-200 font-medium break-words">{sig.reason}</span>
+                              <span className="text-xs text-slate-200 font-medium break-words">
+                                {resolveFraudSignalReason(sig, t.fraudReasons)}
+                              </span>
                             </div>
                             {sig.metadata && (
                               <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">
@@ -631,12 +634,12 @@ export default function SimulatorPage() {
                 </div>
 
                 <div className="p-4 rounded-xl bg-slate-950/60 border border-slate-800 space-y-2 text-xs min-w-0">
-                  <span className="font-bold text-slate-300 block">Thông tin Lưu vết CSDL (Audit Log):</span>
+                  <span className="font-bold text-slate-300 block">{t.simulator.auditTitle}</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-slate-400 font-mono text-[11px] min-w-0">
-                    <div className="break-all">Mã Đánh giá (Risk ID): <span className="text-slate-200">{evaluationResult.riskScoreId}</span></div>
-                    <div className="break-all">Mã Đơn hàng (Order ID): <span className="text-slate-200">{evaluationResult.orderId}</span></div>
-                    <div className="break-all">Affiliate ID: <span className="text-slate-200">{evaluationResult.affiliateId}</span></div>
-                    <div className="break-all">ID Người mua: <span className="text-slate-200">{evaluationResult.userId}</span></div>
+                    <div className="break-all">{t.simulator.riskIdLabel} <span className="text-slate-200">{evaluationResult.riskScoreId}</span></div>
+                    <div className="break-all">{t.simulator.orderIdLabel} <span className="text-slate-200">{evaluationResult.orderId}</span></div>
+                    <div className="break-all">{t.simulator.affiliateIdResultLabel} <span className="text-slate-200">{evaluationResult.affiliateId}</span></div>
+                    <div className="break-all">{t.simulator.buyerIdLabel} <span className="text-slate-200">{evaluationResult.userId}</span></div>
                   </div>
                 </div>
               </div>

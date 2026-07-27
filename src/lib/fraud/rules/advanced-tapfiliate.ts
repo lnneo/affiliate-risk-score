@@ -45,10 +45,17 @@ export async function evaluateAdvancedTapfiliateRules(
     const blacklistMatch = await checkIpBlacklist(order.ip);
 
     if (blacklistMatch?.isBlacklisted) {
+      const blacklistReason = blacklistMatch.reason || 'High-risk IP';
       signals.push({
         type: 'IP_BLACKLISTED',
         score: ipBlacklistWeight,
-        reason: `Địa chỉ IP (${order.ip}) khớp với dải IP Đen động (${blacklistMatch.matchedPattern}): ${blacklistMatch.reason || 'IP nguy hiểm'}`,
+        reason: `IP address (${order.ip}) matches dynamic blacklist range (${blacklistMatch.matchedPattern}): ${blacklistReason}`,
+        reasonKey: 'ipBlacklisted',
+        reasonParams: {
+          ip: order.ip,
+          matchedPattern: blacklistMatch.matchedPattern ?? '',
+          blacklistReason,
+        },
         metadata: { ip: order.ip, matchedPattern: blacklistMatch.matchedPattern, reason: blacklistMatch.reason },
       });
     }
@@ -71,14 +78,17 @@ export async function evaluateAdvancedTapfiliateRules(
       signals.push({
         type: 'REFERRER_SPAM_OR_CLOAKED',
         score: referrerWeight,
-        reason: `Trang giới thiệu (${order.referrer}) thuộc mạng lưới Referrer Spam / Cloaking bị cấm: ${blacklistedDomain.reason}`,
+        reason: `Referrer page (${order.referrer}) is on the banned referrer spam/cloaking network: ${blacklistedDomain.reason}`,
+        reasonKey: 'referrerSpamBlacklisted',
+        reasonParams: { referrer: order.referrer, blacklistReason: blacklistedDomain.reason },
         metadata: { referrer: order.referrer, blacklistedDomain: blacklistedDomain.value },
       });
     } else if (referrerStr.includes('noreferrer') || referrerStr.includes('anonymous')) {
       signals.push({
         type: 'REFERRER_SPAM_OR_CLOAKED',
         score: referrerWeight,
-        reason: `Chuỗi Referrer dùng kỹ thuật ẩn giấu nguồn traffic (Url Cloaking)`,
+        reason: 'Referrer string uses traffic source cloaking (URL cloaking)',
+        reasonKey: 'referrerCloaking',
         metadata: { referrer: order.referrer },
       });
     }
@@ -91,7 +101,9 @@ export async function evaluateAdvancedTapfiliateRules(
       signals.push({
         type: 'SUSPICIOUS_GEOLOCATION',
         score: geoWeight,
-        reason: `Lượt nhấp/mua hàng đến từ quốc gia rủi ro cao (${order.country}) nằm ngoài thị trường mục tiêu`,
+        reason: `Click/purchase originated from high-risk country (${order.country}) outside target market`,
+        reasonKey: 'suspiciousGeolocation',
+        reasonParams: { country: order.country },
         metadata: { country: order.country },
       });
     }
@@ -120,7 +132,9 @@ export async function evaluateAdvancedTapfiliateRules(
       signals.push({
         type: 'CLICK_INFLATION_NO_CONVERSION',
         score: clickInflationWeight,
-        reason: `Affiliate tạo ra ${clicksLast24h.count} lượt click trong 24h nhưng tỷ lệ chuyển đổi = 0% (Spam CTR ảo)`,
+        reason: `Affiliate generated ${clicksLast24h.count} clicks in 24h with 0% conversion rate (CTR spam)`,
+        reasonKey: 'clickInflationNoConversion',
+        reasonParams: { clicks24h: clicksLast24h.count },
         metadata: { clicks24h: clicksLast24h.count, conversions24h: ordersLast24h?.count || 0 },
       });
     }
@@ -141,7 +155,9 @@ export async function evaluateAdvancedTapfiliateRules(
       signals.push({
         type: 'DUPLICATE_CONVERSION',
         score: duplicateWeight,
-        reason: `Mã khách hàng/đơn hàng (${order.externalCustomerId}) đã được ghi nhận hoa hồng trước đó`,
+        reason: `Customer/order ID (${order.externalCustomerId}) was already credited with commission`,
+        reasonKey: 'duplicateConversion',
+        reasonParams: { externalCustomerId: order.externalCustomerId },
         metadata: { externalCustomerId: order.externalCustomerId, previousOrderId: existingConversion.id },
       });
     }

@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import TableOverlay from '@/components/TableOverlay';
 import { useI18n } from '@/i18n/I18nProvider';
+import type { Dictionary } from '@/i18n/dictionaries/vi';
 import { 
   Filter, 
   RefreshCw, 
@@ -24,8 +25,11 @@ const AFFILIATE_PROMOTER = {
   deviceFingerprint: 'fp_john_macbook_m2',
 };
 
+type DecisionKey = keyof Dictionary['decision'];
+
 export default function AdminDashboardPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const dateLocale = locale === 'vi' ? 'vi-VN' : 'en-US';
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterDecision, setFilterDecision] = useState('ALL');
@@ -111,23 +115,23 @@ export default function AdminDashboardPage() {
         {/* Overview Metric Cards */}
         <div className="grid grid-cols-2 md:grid-cols-5 gap-4 min-w-0">
           <div className="glass-card p-4 rounded-xl border border-slate-800 min-w-0">
-            <span className="text-xs text-slate-400 font-medium truncate block">Tổng Đã Đánh Giá</span>
+            <span className="text-xs text-slate-400 font-medium truncate block">{t.dashboard.totalEvaluated}</span>
             <span className="text-2xl font-bold text-slate-100 block mt-1">{total}</span>
           </div>
           <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500 min-w-0">
-            <span className="text-xs text-emerald-400 font-medium truncate block">Đã Duyệt (Approve)</span>
+            <span className="text-xs text-emerald-400 font-medium truncate block">{t.dashboard.approved}</span>
             <span className="text-2xl font-bold text-emerald-400 block mt-1">{approved}</span>
           </div>
           <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-blue-500 min-w-0">
-            <span className="text-xs text-blue-400 font-medium truncate block">Tạm Giữ Chờ Duyệt</span>
+            <span className="text-xs text-blue-400 font-medium truncate block">{t.dashboard.pending}</span>
             <span className="text-2xl font-bold text-blue-400 block mt-1">{pending}</span>
           </div>
           <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-amber-500 min-w-0">
-            <span className="text-xs text-amber-400 font-medium truncate block">Cần Kiểm Tra Thủ Công</span>
+            <span className="text-xs text-amber-400 font-medium truncate block">{t.dashboard.manual}</span>
             <span className="text-2xl font-bold text-amber-400 block mt-1">{manual}</span>
           </div>
           <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-rose-500 min-w-0">
-            <span className="text-xs text-rose-400 font-medium truncate block">Đã Từ Chối (Reject)</span>
+            <span className="text-xs text-rose-400 font-medium truncate block">{t.dashboard.rejected}</span>
             <span className="text-2xl font-bold text-rose-400 block mt-1">{rejected}</span>
           </div>
         </div>
@@ -136,13 +140,13 @@ export default function AdminDashboardPage() {
         <div className="flex items-center justify-between gap-4 bg-slate-900/60 p-2 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
           <div className="flex items-center gap-2 text-xs shrink-0">
             <Filter className="h-4 w-4 text-slate-400 ml-2 shrink-0" />
-            <span className="text-slate-400 font-medium shrink-0">Lọc theo Quyết định:</span>
+            <span className="text-slate-400 font-medium shrink-0">{t.dashboard.filterLabel}</span>
             {[
-              { key: 'ALL', label: 'TẤT CẢ' },
-              { key: 'APPROVE', label: 'DUYỆT (APPROVE)' },
-              { key: 'PENDING_REVIEW', label: 'TẠM GIỮ' },
-              { key: 'MANUAL_REVIEW', label: 'KIỂM TRA THỦ CÔNG' },
-              { key: 'REJECT', label: 'TỪ CHỐI (REJECT)' },
+              { key: 'ALL', label: t.dashboard.filterAll },
+              { key: 'APPROVE', label: t.decision.APPROVE.filter },
+              { key: 'PENDING_REVIEW', label: t.decision.PENDING_REVIEW.filter },
+              { key: 'MANUAL_REVIEW', label: t.decision.MANUAL_REVIEW.filter },
+              { key: 'REJECT', label: t.decision.REJECT.filter },
             ].map((dec) => (
               <button
                 key={dec.key}
@@ -166,19 +170,19 @@ export default function AdminDashboardPage() {
               <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
                 <tr>
-                  <th className="px-4 py-3">Mã Đơn hàng / Thời gian</th>
-                  <th className="px-4 py-3">Affiliate & Người mua</th>
-                  <th className="px-4 py-3">Điểm số & Quyết định</th>
-                  <th className="px-4 py-3">Các Tín hiệu Bất thường</th>
-                  <th className="px-4 py-3">Trạng thái Review</th>
-                  <th className="px-4 py-3 text-right">Thao tác</th>
+                  <th className="px-4 py-3">{t.dashboard.tableOrderTime}</th>
+                  <th className="px-4 py-3">{t.dashboard.tableAffiliateBuyer}</th>
+                  <th className="px-4 py-3">{t.dashboard.tableScoreDecision}</th>
+                  <th className="px-4 py-3">{t.dashboard.tableSignals}</th>
+                  <th className="px-4 py-3">{t.dashboard.tableReviewStatus}</th>
+                  <th className="px-4 py-3 text-right">{t.dashboard.tableActions}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-800/60 text-slate-300">
                 {data.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                      Chưa có bản ghi đánh giá điểm rủi ro nào. Hãy thử chạy kịch bản ở trang Giả lập hoặc bấm nút &ldquo;Nạp dữ liệu&rdquo;.
+                      {t.dashboard.noData}
                     </td>
                   </tr>
                 ) : (
@@ -186,13 +190,13 @@ export default function AdminDashboardPage() {
                     <tr key={item.risk_score_id} className="hover:bg-slate-900/40 transition-colors">
                       <td className="px-4 py-3.5 font-mono max-w-[180px] break-all">
                         <div className="font-bold text-slate-200 break-all">{item.order_id}</div>
-                        <div className="text-[10px] text-slate-500">{new Date(item.created_at).toLocaleString('vi-VN')}</div>
+                        <div className="text-[10px] text-slate-500">{new Date(item.created_at).toLocaleString(dateLocale)}</div>
                       </td>
 
                       <td className="px-4 py-3.5 max-w-[220px] break-all">
                         <div className="font-semibold text-slate-200 break-all">{item.user_email}</div>
-                        <div className="text-[11px] text-indigo-400 break-all">Ref: {item.affiliate_id}</div>
-                        <div className="text-[10px] text-slate-500 font-mono break-all">IP: {item.ip}</div>
+                        <div className="text-[11px] text-indigo-400 break-all">{t.refLanding.ref} {item.affiliate_id}</div>
+                        <div className="text-[10px] text-slate-500 font-mono break-all">{t.common.ip}: {item.ip}</div>
                       </td>
 
                       <td className="px-4 py-3.5 whitespace-nowrap">
@@ -203,7 +207,7 @@ export default function AdminDashboardPage() {
                             item.total_score >= 40 ? 'text-blue-400' :
                             'text-emerald-400'
                           }`}>
-                            {item.total_score} điểm
+                            {item.total_score} {t.dashboard.points}
                           </span>
                           <span className={`px-2 py-0.5 rounded text-[10px] font-bold border ${
                             item.decision === 'APPROVE' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
@@ -211,14 +215,14 @@ export default function AdminDashboardPage() {
                             item.decision === 'MANUAL_REVIEW' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
                             'bg-blue-500/10 text-blue-400 border-blue-500/20'
                           }`}>
-                            {item.decision}
+                            {t.decision[item.decision as DecisionKey].filter}
                           </span>
                         </div>
                       </td>
 
                       <td className="px-4 py-3.5 max-w-[260px]">
                         {item.signals.length === 0 ? (
-                          <span className="text-[11px] text-emerald-400 font-medium">Sạch (0 tín hiệu)</span>
+                          <span className="text-[11px] text-emerald-400 font-medium">{t.dashboard.cleanSignals}</span>
                         ) : (
                           <div className="flex flex-wrap gap-1">
                             {item.signals.map((sig: any, idx: number) => (
@@ -236,8 +240,8 @@ export default function AdminDashboardPage() {
                           item.review_status === 'REJECTED' ? 'bg-rose-500/20 text-rose-300' :
                           'bg-slate-800 text-slate-400'
                         }`}>
-                          {item.review_status === 'APPROVED' ? 'ĐÃ DUYỆT' :
-                           item.review_status === 'REJECTED' ? 'ĐÃ TỪ CHỐI' : 'CHƯA DUYỆT'}
+                          {item.review_status === 'APPROVED' ? t.dashboard.reviewApproved :
+                           item.review_status === 'REJECTED' ? t.dashboard.reviewRejected : t.dashboard.reviewPending}
                         </span>
                       </td>
 
@@ -246,7 +250,7 @@ export default function AdminDashboardPage() {
                           onClick={() => setSelectedRecord(item)}
                           className="px-2.5 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium"
                         >
-                          <Eye className="h-3 w-3 inline mr-1" /> Chi tiết
+                          <Eye className="h-3 w-3 inline mr-1" /> {t.common.detail}
                         </button>
                       </td>
                     </tr>
@@ -264,7 +268,7 @@ export default function AdminDashboardPage() {
             <div className="glass-card max-w-2xl w-full rounded-2xl border border-slate-800 p-6 flex flex-col max-h-[85vh] overflow-hidden min-w-0">
               {/* Header (Fixed) */}
               <div className="flex items-center justify-between border-b border-slate-800 pb-4 shrink-0 min-w-0">
-                <h3 className="font-bold text-lg text-slate-100 break-words">Chi tiết Audit Tín hiệu Gian lận</h3>
+                <h3 className="font-bold text-lg text-slate-100 break-words">{t.dashboard.detailTitle}</h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
                   className="text-slate-400 hover:text-slate-200 font-bold text-lg p-1 shrink-0"
@@ -278,38 +282,38 @@ export default function AdminDashboardPage() {
                 {/* Side by side comparison (Fixed, no scroll) */}
                 <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 min-w-0 shrink-0">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                    <ArrowRightLeft className="h-4 w-4 shrink-0" /> Bảng Đối soát: Người Mua vs Người Giới Thiệu ({selectedRecord.affiliate_id})
+                    <ArrowRightLeft className="h-4 w-4 shrink-0" /> {t.dashboard.comparisonTitle} ({selectedRecord.affiliate_id})
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono min-w-0">
                     <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
-                      <span className="text-[10px] font-sans text-slate-400 block font-semibold">Thông tin Đơn hàng Người Mua:</span>
-                      <div className="break-all">Email: <span className={selectedRecord.user_email.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.user_email}</span></div>
-                      <div className="break-all">PayPal: <span className={selectedRecord.payment_account.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.payment_account}</span></div>
-                      <div className="break-all">Fingerprint: <span className={selectedRecord.fingerprint_hash?.includes('john_macbook') ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.fingerprint_hash || 'N/A'}</span></div>
-                      <div className="break-all">IP: <span className={selectedRecord.ip === AFFILIATE_PROMOTER.registeredIp ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.ip}</span></div>
+                      <span className="text-[10px] font-sans text-slate-400 block font-semibold">{t.dashboard.buyerOrderInfo}</span>
+                      <div className="break-all">{t.common.email}: <span className={selectedRecord.user_email.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.user_email}</span></div>
+                      <div className="break-all">{t.common.paypal}: <span className={selectedRecord.payment_account.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.payment_account}</span></div>
+                      <div className="break-all">{t.common.fingerprint}: <span className={selectedRecord.fingerprint_hash?.includes('john_macbook') ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.fingerprint_hash || t.common.nA}</span></div>
+                      <div className="break-all">{t.common.ip}: <span className={selectedRecord.ip === AFFILIATE_PROMOTER.registeredIp ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.ip}</span></div>
                     </div>
                     <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
-                      <span className="text-[10px] font-sans text-indigo-400 block font-semibold">Hồ sơ Gốc Affiliate (John Doe):</span>
-                      <div className="break-all">Email: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
-                      <div className="break-all">PayPal: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
-                      <div className="break-all">Fingerprint: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
-                      <div className="break-all">IP: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
+                      <span className="text-[10px] font-sans text-indigo-400 block font-semibold">{t.dashboard.affiliateProfile}</span>
+                      <div className="break-all">{t.common.email}: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
+                      <div className="break-all">{t.common.paypal}: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
+                      <div className="break-all">{t.common.fingerprint}: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
+                      <div className="break-all">{t.common.ip}: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Signals Tree (Isolated Scrollable Area) */}
                 <div className="space-y-2 min-w-0 flex-1 flex flex-col overflow-hidden">
-                  <h4 className="font-bold text-slate-300 shrink-0">Cây Tín hiệu Gian lận & Giải thích Chi tiết:</h4>
+                  <h4 className="font-bold text-slate-300 shrink-0">{t.dashboard.signalsTreeTitle}</h4>
                   <div className="overflow-y-auto flex-1 space-y-2.5 pr-1.5 max-h-[280px]">
                     {selectedRecord.signals.length === 0 ? (
-                      <div className="p-3 rounded bg-emerald-500/10 text-emerald-400">Không có tín hiệu gian lận nào.</div>
+                      <div className="p-3 rounded bg-emerald-500/10 text-emerald-400">{t.dashboard.noSignals}</div>
                     ) : (
                       selectedRecord.signals.map((sig: any, i: number) => (
                         <div key={i} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1 min-w-0">
                           <div className="flex items-center justify-between gap-2">
                             <span className="font-bold text-rose-400 break-all">{sig.signal_type}</span>
-                            <span className="font-bold text-rose-400 shrink-0">+{sig.score} điểm</span>
+                            <span className="font-bold text-rose-400 shrink-0">+{sig.score} {t.dashboard.points}</span>
                           </div>
                           <p className="text-slate-300 leading-relaxed break-words">{sig.reason}</p>
                           {sig.metadata_json && (
@@ -325,27 +329,27 @@ export default function AdminDashboardPage() {
 
                 {/* Manual Override Buttons (Fixed at bottom) */}
                 <div className="pt-3 border-t border-slate-800 space-y-3 min-w-0 shrink-0">
-                  <span className="font-bold text-slate-300 block">Thao tác Ghi đè Quyết định (Manual Override):</span>
+                  <span className="font-bold text-slate-300 block">{t.dashboard.overrideTitle}</span>
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <LoadingButton
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'APPROVED')}
                       loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'APPROVED'}
-                      loadingText="Đang duyệt..."
+                      loadingText={t.dashboard.approvingBtn}
                       icon={<ThumbsUp className="h-3.5 w-3.5 shrink-0" />}
                       disabled={Boolean(reviewingAction)}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
-                      Duyệt
+                      {t.dashboard.approveBtn}
                     </LoadingButton>
                     <LoadingButton
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'REJECTED')}
                       loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'REJECTED'}
-                      loadingText="Đang từ chối..."
+                      loadingText={t.dashboard.rejectingBtn}
                       icon={<ThumbsDown className="h-3.5 w-3.5 shrink-0" />}
                       disabled={Boolean(reviewingAction)}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
-                      Từ chối
+                      {t.dashboard.rejectBtn}
                     </LoadingButton>
                   </div>
                 </div>
