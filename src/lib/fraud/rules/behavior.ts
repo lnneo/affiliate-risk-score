@@ -1,4 +1,4 @@
-import { db } from '../../db';
+import { queryOne } from '../../db';
 import { FraudSignal, OrderContext, RuleConfig } from '../types';
 
 export async function evaluateBehaviorRules(
@@ -16,16 +16,22 @@ export async function evaluateBehaviorRules(
   const velocityWeight = getWeight('VELOCITY_EXCEEDED', 20);
   if (velocityWeight > 0) {
     // Check orders count from same IP in last 10 minutes
-    const ipVelocity = db.prepare(`
-      SELECT COUNT(*) as count FROM orders 
-      WHERE ip = ? AND datetime(created_at) >= datetime('now', '-10 minutes')
-    `).get(order.ip) as { count: number };
+    const ipVelocity = await queryOne<{ count: number }>(
+      `
+        SELECT COUNT(*) as count FROM orders
+        WHERE ip = ? AND datetime(created_at) >= datetime('now', '-10 minutes')
+      `,
+      [order.ip],
+    );
 
     // Check clicks count for this affiliate in last 5 minutes
-    const clickVelocity = db.prepare(`
-      SELECT COUNT(*) as count FROM affiliate_clicks 
-      WHERE affiliate_id = ? AND datetime(clicked_at) >= datetime('now', '-5 minutes')
-    `).get(order.affiliateId) as { count: number };
+    const clickVelocity = await queryOne<{ count: number }>(
+      `
+        SELECT COUNT(*) as count FROM affiliate_clicks
+        WHERE affiliate_id = ? AND datetime(clicked_at) >= datetime('now', '-5 minutes')
+      `,
+      [order.affiliateId],
+    );
 
     if ((ipVelocity && ipVelocity.count >= 3) || (clickVelocity && clickVelocity.count >= 10)) {
       signals.push({

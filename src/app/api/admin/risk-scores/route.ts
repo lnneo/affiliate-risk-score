@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { execute, queryMany } from '@/lib/db';
 
 export async function GET(req: Request) {
   try {
@@ -46,17 +46,18 @@ export async function GET(req: Request) {
 
     query += ` ORDER BY rs.created_at DESC LIMIT 100`;
 
-    const riskScores = db.prepare(query).all(...params) as any[];
+    const riskScores = await queryMany<any>(query, params);
 
     // Attach signals to each score
-    const getSignals = db.prepare(`
-      SELECT signal_type, score, reason, metadata_json, created_at 
-      FROM affiliate_risk_signals 
-      WHERE risk_score_id = ?
-    `);
-
-    const result = riskScores.map((score) => {
-      const rawSignals = getSignals.all(score.risk_score_id) as any[];
+    const result = await Promise.all(riskScores.map(async (score) => {
+      const rawSignals = await queryMany<any>(
+        `
+          SELECT signal_type, score, reason, metadata_json, created_at
+          FROM affiliate_risk_signals
+          WHERE risk_score_id = ?
+        `,
+        [score.risk_score_id],
+      );
       return {
         ...score,
         signals: rawSignals.map((s) => ({
@@ -64,7 +65,7 @@ export async function GET(req: Request) {
           metadata: s.metadata_json ? JSON.parse(s.metadata_json) : null,
         })),
       };
-    });
+    }));
 
     return NextResponse.json({ success: true, count: result.length, data: result });
   } catch (error: any) {
@@ -81,11 +82,11 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
     }
 
-    db.prepare(`
+    await execute(`
       UPDATE affiliate_risk_scores 
       SET review_status = ? 
       WHERE id = ?
-    `).run(reviewStatus, riskScoreId);
+    `, [reviewStatus, riskScoreId]);
 
     return NextResponse.json({ success: true, riskScoreId, reviewStatus });
   } catch (error: any) {

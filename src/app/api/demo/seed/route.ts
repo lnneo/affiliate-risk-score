@@ -1,42 +1,42 @@
 import { NextResponse } from 'next/server';
-import { db, initDatabase } from '@/lib/db';
+import { execute, initDatabase } from '@/lib/db';
 import { evaluateOrderRisk } from '@/lib/fraud/risk-engine';
 
 export async function POST() {
   try {
-    initDatabase();
+    await initDatabase();
 
     // Reset tables
-    db.prepare('DELETE FROM affiliate_risk_signals').run();
-    db.prepare('DELETE FROM affiliate_risk_scores').run();
-    db.prepare('DELETE FROM orders').run();
-    db.prepare('DELETE FROM affiliate_clicks').run();
-    db.prepare('DELETE FROM device_fingerprints').run();
+    await execute('DELETE FROM affiliate_risk_signals');
+    await execute('DELETE FROM affiliate_risk_scores');
+    await execute('DELETE FROM orders');
+    await execute('DELETE FROM affiliate_clicks');
+    await execute('DELETE FROM device_fingerprints');
 
     // 1. Seed Fingerprints
     const fpAffiliate = 'fp_john_macbook_m2';
     const fpBuyerClean = 'fp_buyer_alice_macbook';
 
-    db.prepare(`
+    await execute(`
       INSERT INTO device_fingerprints (id, fingerprint_hash, browser, browser_version, os, timezone, language, screen)
       VALUES ('fp_1', ?, 'Chrome', '120.0', 'macOS', 'Asia/Ho_Chi_Minh', 'vi-VN', '2560x1600')
-    `).run(fpAffiliate);
+    `, [fpAffiliate]);
 
-    db.prepare(`
+    await execute(`
       INSERT INTO device_fingerprints (id, fingerprint_hash, browser, browser_version, os, timezone, language, screen)
       VALUES ('fp_2', ?, 'Safari', '17.2', 'macOS', 'America/New_York', 'en-US', '1920x1080')
-    `).run(fpBuyerClean);
+    `, [fpBuyerClean]);
 
     // 2. Seed Affiliate Clicks
-    db.prepare(`
+    await execute(`
       INSERT INTO affiliate_clicks (id, affiliate_id, cookie_id, session_id, fingerprint_id, ip, country, referrer, clicked_at)
       VALUES ('clk_1', 'aff_john_doe', 'ck_john_master_session', 'sess_111', 'fp_1', '118.69.182.10', 'VN', 'https://techblog.com/review', CURRENT_TIMESTAMP)
-    `).run();
+    `);
 
-    db.prepare(`
+    await execute(`
       INSERT INTO affiliate_clicks (id, affiliate_id, cookie_id, session_id, fingerprint_id, ip, country, referrer, clicked_at)
       VALUES ('clk_2', 'aff_john_doe', 'ck_alice_clean_session', 'sess_222', 'fp_2', '24.180.12.99', 'US', 'https://google.com', CURRENT_TIMESTAMP)
-    `).run();
+    `);
 
     // 3. Seed Fraud Orders
     // Case 1: Clean Order (0 pts -> APPROVE)

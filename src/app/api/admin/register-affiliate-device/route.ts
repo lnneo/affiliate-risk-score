@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { execute } from '@/lib/db';
 
 export async function POST(req: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(req: Request) {
       ip = detectedIp,
     } = body;
 
-    db.prepare(`
+    await execute(`
       INSERT INTO affiliate_profiles (affiliate_id, name, email, payment_account, registered_ip, registered_fingerprint_hash)
       VALUES (?, ?, ?, ?, ?, ?)
       ON CONFLICT(affiliate_id) DO UPDATE SET
@@ -26,7 +26,7 @@ export async function POST(req: Request) {
         registered_fingerprint_hash = excluded.registered_fingerprint_hash,
         email = excluded.email,
         payment_account = excluded.payment_account
-    `).run(affiliateId, name, email, paymentAccount, ip, fingerprintHash);
+    `, [affiliateId, name, email, paymentAccount, ip, fingerprintHash]);
 
     return NextResponse.json({
       success: true,

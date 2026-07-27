@@ -20,6 +20,25 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Database
+
+Local development uses a SQLite file in `data/affiliate_fraud.db`.
+
+Production can use Turso by setting:
+
+```bash
+TURSO_DATABASE_URL=libsql://your-database.turso.io
+TURSO_AUTH_TOKEN=your-turso-auth-token
+```
+
+Bootstrap the Turso schema and default seed data with:
+
+```bash
+pnpm db:turso:bootstrap
+```
+
+Set `LOCAL_DB=1` to force the app to use the local SQLite file instead of Turso.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

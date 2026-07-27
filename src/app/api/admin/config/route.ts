@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { execute, queryMany } from '@/lib/db';
 
 export async function GET() {
   try {
-    const rules = db.prepare('SELECT * FROM rule_configs').all();
+    const rules = await queryMany('SELECT * FROM rule_configs');
     return NextResponse.json({ success: true, data: rules });
   } catch (error: any) {
     return NextResponse.json({ success: false, error: error.message }, { status: 500 });
@@ -19,11 +19,11 @@ export async function POST(req: Request) {
       return NextResponse.json({ success: false, error: 'Invalid parameters' }, { status: 400 });
     }
 
-    db.prepare(`
+    await execute(`
       UPDATE rule_configs 
       SET score_weight = ?, enabled = ? 
       WHERE rule_type = ?
-    `).run(scoreWeight, enabled ? 1 : 0, ruleType);
+    `, [scoreWeight, enabled ? 1 : 0, ruleType]);
 
     return NextResponse.json({ success: true, ruleType, scoreWeight, enabled });
   } catch (error: any) {
