@@ -16,6 +16,11 @@ Fix GitHub Actions unit test failures caused by `SQLITE_BUSY: database is locked
    - **Purpose**: give each Vitest worker its own SQLite file, serialize `initDatabase()` locally, and apply `PRAGMA busy_timeout` during schema initialization.
    - **Files Changed**: `src/lib/db.ts`
 
+2. **Commit Hash**: `PENDING`
+   - **Summary**: `test: force test environment to stay on local SQLite`
+   - **Purpose**: explicitly force test runtime away from Turso even if `TURSO_DATABASE_URL` or `TURSO_AUTH_TOKEN` are present in CI, and assert that test DB URLs use worker-scoped local SQLite files.
+   - **Files Changed**: `src/lib/db.ts`, `src/lib/__tests__/db-init.test.ts`
+
 ---
 
 ## Verification Performed
@@ -23,6 +28,7 @@ Fix GitHub Actions unit test failures caused by `SQLITE_BUSY: database is locked
 - `pnpm exec vitest run --pool=threads --maxWorkers=4`: Passed
 - `pnpm test`: Passed
 - `pnpm run build`: Passed
+- Test assertions confirm `isUsingTurso() === false` and local worker-scoped SQLite URLs in test environment.
 
 ---
 

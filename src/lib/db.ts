@@ -7,8 +7,12 @@ import { defaultRuleStatements, defaultSeedStatements, schemaStatements, type Sq
 type SqlPrimitive = string | number | bigint | ArrayBuffer | Uint8Array | null;
 type QueryArgs = ReadonlyArray<SqlPrimitive | boolean | undefined>;
 
-const useTurso = process.env.NODE_ENV === 'production' && Boolean(process.env.TURSO_DATABASE_URL) && !process.env.LOCAL_DB;
 const isTestEnv = process.env.NODE_ENV === 'test' || Boolean(process.env.VITEST);
+const forceLocalDb = Boolean(process.env.LOCAL_DB) || isTestEnv;
+const useTurso =
+  !forceLocalDb &&
+  process.env.NODE_ENV === 'production' &&
+  Boolean(process.env.TURSO_DATABASE_URL);
 const localDataDir = path.join(process.cwd(), 'data');
 const localDbPath = isTestEnv
   ? path.join(localDataDir, `affiliate_fraud.test-${process.env.VITEST_WORKER_ID ?? '0'}.db`)
@@ -20,6 +24,10 @@ if (!useTurso && !fs.existsSync(localDataDir)) {
 }
 
 function createDbClient(): Client {
+  if (isTestEnv) {
+    return createClient({ url: localDbUrl });
+  }
+
   if (useTurso) {
     const url = process.env.TURSO_DATABASE_URL;
     const authToken = process.env.TURSO_AUTH_TOKEN;
@@ -162,6 +170,10 @@ export async function initDatabase(): Promise<void> {
 
 export function isUsingTurso(): boolean {
   return useTurso;
+}
+
+export function isUsingLocalSqlite(): boolean {
+  return !useTurso;
 }
 
 export function getLocalDbUrl(): string {

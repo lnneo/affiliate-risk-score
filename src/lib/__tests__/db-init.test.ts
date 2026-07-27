@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { execute, initDatabase, queryMany } from '../db';
+import { execute, getLocalDbUrl, initDatabase, isUsingLocalSqlite, isUsingTurso, queryMany } from '../db';
 
 describe('db init', () => {
   beforeEach(async () => {
@@ -8,6 +8,10 @@ describe('db init', () => {
   });
 
   it('initDatabase is idempotent for default blacklisted values', async () => {
+    expect(isUsingTurso()).toBe(false);
+    expect(isUsingLocalSqlite()).toBe(true);
+    expect(getLocalDbUrl()).toContain('affiliate_fraud.test-');
+
     // If seeding is not idempotent, the second call may throw
     await expect(initDatabase()).resolves.toBeUndefined();
     await expect(initDatabase()).resolves.toBeUndefined();
