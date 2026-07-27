@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
+import TableOverlay from '@/components/TableOverlay';
 import { Sliders, RefreshCw, Power, Ban, Plus, Trash2 } from 'lucide-react';
 
 export default function AdminConfigPage() {
@@ -200,8 +201,9 @@ export default function AdminConfigPage() {
           </div>
 
           {/* Blacklist Table */}
-          <div className="overflow-x-auto max-w-full">
-            <table className="w-full text-left text-xs font-mono min-w-[500px]">
+          <TableOverlay loading={loading} label="Đang tải danh sách đen...">
+            <div className="overflow-x-auto max-w-full">
+              <table className="w-full text-left text-xs font-mono min-w-[500px]">
               <thead className="bg-slate-950/80 text-slate-400 uppercase text-[10px]">
                 <tr>
                   <th className="px-3 py-2">Loại</th>
@@ -243,6 +245,7 @@ export default function AdminConfigPage() {
               </tbody>
             </table>
           </div>
+          </TableOverlay>
         </div>
 
         {/* Rule Grid */}
