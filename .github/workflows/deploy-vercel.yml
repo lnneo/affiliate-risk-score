@@ -1,0 +1,47 @@
+name: Deploy to Vercel (Develop Branch)
+
+on:
+  push:
+    branches:
+      - develop
+  workflow_dispatch:
+
+env:
+  VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  test-and-deploy:
+    name: Test & Deploy to Vercel
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.13.1
+
+      - name: Setup Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'pnpm'
+
+      - name: Install Dependencies
+        run: pnpm install
+
+      - name: Run Vitest Unit Tests
+        run: pnpm test
+
+      - name: Pull Vercel Environment Settings
+        run: pnpm exec vercel pull --yes --environment=preview --token=$VERCEL_TOKEN
+
+      - name: Build Project Artifacts
+        run: pnpm exec vercel build --token=$VERCEL_TOKEN
+
+      - name: Deploy Artifacts to Vercel
+        run: pnpm exec vercel deploy --prebuilt --token=$VERCEL_TOKEN
