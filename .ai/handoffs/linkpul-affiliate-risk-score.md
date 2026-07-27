@@ -5,7 +5,9 @@
 - **Goal**: Implement a production-grade, 100% compliant Affiliate Fraud Risk Engine adhering to [Tapfiliate Enterprise Anti-Fraud Specifications](https://support.tapfiliate.com/en/articles/5898063-fraud-prevention-monitoring-in-affiliate-marketing).
 - **Business Logic Specification (English)**: Reference [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md)
 - **Business Logic Specification (Vietnamese)**: Reference [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md)
-- **Language & Stack**: TypeScript, Next.js App Router, TailwindCSS, `better-sqlite3`, FingerprintJS (OSS), Vitest.
+- **Language & Stack**: TypeScript, Next.js App Router, TailwindCSS, `better-sqlite3` (SQLite v3.53.3), FingerprintJS (OSS), Vitest, `pnpm`.
+- **Node SDK Constraint**: Node.js `>= 20.0.0` (Enforced in `package.json` engines & `.nvmrc` for native C++ `better-sqlite3` N-API bindings compatibility).
+- **Package Manager**: `pnpm@11.13.1`
 - **Current Branch**: `feature/linkpul-affiliate-risk-score`
 - **Latest Implementation Commit**: `ca9de02` (`feat: implement LinkPul 100% Tapfiliate Enterprise affiliate risk score engine`)
 
@@ -29,7 +31,7 @@ Key tables in `src/lib/db.ts`:
 
 | File Path | Technical Description |
 | :--- | :--- |
-| `src/lib/db.ts` | SQLite DB connection, table schemas, migrations, and initial seed defaults. |
+| `src/lib/db.ts` | SQLite DB connection (SQLite v3.53.3 via `better-sqlite3`), table schemas, migrations, and initial seed defaults. |
 | `src/lib/fraud/types.ts` | Data types (`OrderContext`, `FraudSignal`, `RiskDecision`, `RiskEvaluationResult`). |
 | `src/lib/fraud/risk-engine.ts` | Main aggregator evaluating all 15 rules and persisting decisions. |
 | `src/lib/fraud/rules/identity.ts` | Evaluates `SELF_REFERRAL`, `SAME_PAYMENT_ACCOUNT`, `SAME_COOKIE`, `SAME_FINGERPRINT`, `SAME_HARDWARE_CLUSTER`, `DISPOSABLE_EMAIL`. |
@@ -51,10 +53,10 @@ Key tables in `src/lib/db.ts`:
 ## 4. Verification Performed
 
 - **Automated Unit Tests**:
-  - Command: `npx vitest run`
+  - Command: `pnpm test`
   - Result: 5/5 test suites passed cleanly.
 - **Production Build**:
-  - Command: `npm run build`
+  - Command: `pnpm build`
   - Result: Compiled successfully with Next.js Turbopack.
 - **Dev Server & Database Seeding**:
   - Endpoints verified: `POST /api/demo/seed`, `POST /api/checkout/evaluate`, `GET/POST /api/admin/blacklist`.
@@ -64,7 +66,8 @@ Key tables in `src/lib/db.ts`:
 ## 5. Instructions for Next AI Agent
 
 1. **Business Rules**: Check [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md) (EN) or [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md) (VI) for business requirements.
-2. **Development Server**: Run `npm run dev` to start dev server on `http://localhost:3000`.
-3. **Database Reset**: Call `POST http://localhost:3000/api/demo/seed` to re-seed initial test data if needed.
-4. **Adding Rules**: Extend rules under `src/lib/fraud/rules/` and register rule configs in `initDatabase()` in `src/lib/db.ts`.
-5. **Git Workflow**: Always inspect `.ai/handoffs/linkpul-affiliate-risk-score.md` and keep commits incremental in `feature/linkpul-affiliate-risk-score`.
+2. **Development Server**: Run `pnpm dev` to start dev server on `http://localhost:3000`.
+3. **Node Engine Requirement**: Use Node.js `>= 20.0.0` (as defined in `.nvmrc` and `package.json`).
+4. **Database Reset**: Call `POST http://localhost:3000/api/demo/seed` to re-seed initial test data if needed.
+5. **Adding Rules**: Extend rules under `src/lib/fraud/rules/` and register rule configs in `initDatabase()` in `src/lib/db.ts`.
+6. **Git Workflow**: Always inspect [.ai/handoffs/linkpul-affiliate-risk-score.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/linkpul-affiliate-risk-score.md) and keep commits incremental in `feature/linkpul-affiliate-risk-score`.
