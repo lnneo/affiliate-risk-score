@@ -62,7 +62,7 @@ export default function ReferralGeneratorPage() {
       });
       const data = await res.json();
       if (data.success) {
-        setRegisteredMsg(`Đã lưu Fingerprint (${myFingerprint.slice(0, 8)}...) làm thiết bị gốc của Affiliate!`);
+        setRegisteredMsg(`Đã lưu Fingerprint (${myFingerprint.slice(0, 8)}...) làm thiết bị gốc!`);
       }
     } catch (err) {
       console.error(err);
@@ -132,7 +132,7 @@ export default function ReferralGeneratorPage() {
                 className="px-4 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 text-white font-bold text-xs shadow-lg shadow-indigo-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 max-w-full"
               >
                 <Fingerprint className="h-4 w-4 text-amber-400 shrink-0" />
-                <span className="break-words">{registering ? 'Đang đăng ký...' : `Đăng ký Vân tay máy này làm thiết bị gốc của ${affiliateId}`}</span>
+                <span className="break-words">{registering ? 'Đang đăng ký...' : 'Đăng ký thiết bị'}</span>
               </button>
               {registeredMsg && (
                 <div className="text-xs text-emerald-400 font-medium flex items-center justify-start md:justify-end gap-1 break-words">
@@ -172,7 +172,7 @@ export default function ReferralGeneratorPage() {
                 className="w-full sm:flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700"
               >
                 {copiedLocal ? <Check className="h-4 w-4 text-emerald-400 shrink-0" /> : <Copy className="h-4 w-4 shrink-0" />}
-                <span>{copiedLocal ? 'Đã sao chép!' : 'Sao chép Link'}</span>
+                <span>{copiedLocal ? 'Đã sao chép!' : 'Sao chép'}</span>
               </button>
               <a
                 href={localLink}
@@ -180,7 +180,7 @@ export default function ReferralGeneratorPage() {
                 rel="noreferrer"
                 className="w-full sm:flex-1 py-2.5 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-indigo-600/30 transition-all"
               >
-                <ExternalLink className="h-4 w-4 shrink-0" /> <span>Mở Link Ngay</span>
+                <ExternalLink className="h-4 w-4 shrink-0" /> <span>Mở link</span>
               </a>
             </div>
           </div>
@@ -212,7 +212,7 @@ export default function ReferralGeneratorPage() {
                 className="w-full sm:flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-700"
               >
                 {copiedNetwork ? <Check className="h-4 w-4 text-emerald-400 shrink-0" /> : <Copy className="h-4 w-4 shrink-0" />}
-                <span>{copiedNetwork ? 'Đã sao chép!' : 'Sao chép Link Gửi Đồng Nghiệp'}</span>
+                <span>{copiedNetwork ? 'Đã sao chép!' : 'Sao chép'}</span>
               </button>
               <a
                 href={networkLink}
@@ -220,7 +220,7 @@ export default function ReferralGeneratorPage() {
                 rel="noreferrer"
                 className="w-full sm:flex-1 py-2.5 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/30 transition-all"
               >
-                <ExternalLink className="h-4 w-4 shrink-0" /> <span>Mở Mạng LAN</span>
+                <ExternalLink className="h-4 w-4 shrink-0" /> <span>Mở link</span>
               </a>
             </div>
           </div>
@@ -237,7 +237,7 @@ export default function ReferralGeneratorPage() {
             <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-2 min-w-0">
               <span className="font-bold text-indigo-400 text-sm block">Bước 1: Đăng ký Vân tay máy bạn</span>
               <p className="text-slate-400 leading-relaxed break-words">
-                Bấm nút **&ldquo;Đăng ký Vân tay máy này làm thiết bị gốc của aff_john_doe&rdquo;** ở trên để hệ thống ghi nhận Fingerprint thực tế của máy bạn làm thiết bị Affiliate chủ.
+                Bấm nút **&ldquo;Đăng ký thiết bị&rdquo;** ở trên để hệ thống ghi nhận Fingerprint thực tế của máy bạn làm thiết bị Affiliate chủ.
               </p>
             </div>
 

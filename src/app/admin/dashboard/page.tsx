@@ -95,7 +95,7 @@ export default function AdminDashboardPage() {
             className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Làm mới Bảng
+            Làm mới
           </button>
         </div>
 
@@ -168,7 +168,7 @@ export default function AdminDashboardPage() {
                 {data.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
-                      Chưa có bản ghi đánh giá điểm rủi ro nào. Hãy thử chạy kịch bản ở trang Giả lập hoặc bấm nút &ldquo;Nạp Dữ liệu Mẫu&rdquo;.
+                      Chưa có bản ghi đánh giá điểm rủi ro nào. Hãy thử chạy kịch bản ở trang Giả lập hoặc bấm nút &ldquo;Nạp dữ liệu&rdquo;.
                     </td>
                   </tr>
                 ) : (
@@ -236,7 +236,7 @@ export default function AdminDashboardPage() {
                           onClick={() => setSelectedRecord(item)}
                           className="px-2.5 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium"
                         >
-                          <Eye className="h-3 w-3 inline mr-1" /> Soi chi tiết
+                          <Eye className="h-3 w-3 inline mr-1" /> Chi tiết
                         </button>
                       </td>
                     </tr>
@@ -316,13 +316,13 @@ export default function AdminDashboardPage() {
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'APPROVED')}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                     >
-                      <ThumbsUp className="h-3.5 w-3.5 shrink-0" /> Duyệt Hoa Hồng (Approve)
+                      <ThumbsUp className="h-3.5 w-3.5 shrink-0" /> Duyệt
                     </button>
                     <button
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'REJECTED')}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                     >
-                      <ThumbsDown className="h-3.5 w-3.5 shrink-0" /> Từ Chối Hoa Hồng (Reject)
+                      <ThumbsDown className="h-3.5 w-3.5 shrink-0" /> Từ chối
                     </button>
                   </div>
                 </div>

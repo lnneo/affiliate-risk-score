@@ -338,7 +338,7 @@ export default function SimulatorPage() {
                 </h2>
                 <button
                   onClick={() => setFormData(PRESET_SCENARIOS.find(s => s.id === selectedScenario)?.form || formData)}
-                  className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 shrink-0"
+                  className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 shrink-0 font-medium"
                 >
                   <RefreshCw className="h-3 w-3" /> Đặt lại
                 </button>
@@ -506,11 +506,11 @@ export default function SimulatorPage() {
               >
                 {loading ? (
                   <>
-                    <RefreshCw className="h-5 w-5 animate-spin" /> Đang đối soát Risk Engine...
+                    <RefreshCw className="h-5 w-5 animate-spin" /> Đang đối soát...
                   </>
                 ) : (
                   <>
-                    <Play className="h-5 w-5 fill-current" /> Chạy Đánh giá Risk Engine (15 Rules)
+                    <Play className="h-5 w-5 fill-current" /> Đánh giá
                   </>
                 )}
               </button>
@@ -526,7 +526,7 @@ export default function SimulatorPage() {
                 </div>
                 <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đánh giá Kịch bản (100% Tapfiliate Rules)</h3>
                 <p className="text-xs text-slate-400 max-w-md">
-                  Bấm nút &ldquo;Chạy Đánh giá Risk Engine&rdquo; để đối soát tất cả 15 thuật toán phòng chống gian lận.
+                  Bấm nút &ldquo;Đánh giá&rdquo; để đối soát tất cả 15 thuật toán phòng chống gian lận.
                 </p>
               </div>
             )}

@@ -186,7 +186,7 @@ export default function AdminConfigPage() {
               disabled={addingBlacklist || !newValue.trim()}
               className="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/30 transition-all disabled:opacity-50 shrink-0"
             >
-              <Plus className="h-4 w-4 shrink-0" /> Thêm vào Danh sách Đen
+              <Plus className="h-4 w-4 shrink-0" /> Thêm
             </button>
           </div>
 
@@ -219,9 +219,9 @@ export default function AdminConfigPage() {
                       <td className="px-3 py-2 text-right whitespace-nowrap">
                         <button
                           onClick={() => handleDeleteBlacklist(item.id)}
-                          className="text-rose-400 hover:text-rose-300 p-1"
+                          className="text-rose-400 hover:text-rose-300 p-1 font-medium"
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-3.5 w-3.5 inline mr-1" /> Xóa
                         </button>
                       </td>
                     </tr>
@@ -258,7 +258,7 @@ export default function AdminConfigPage() {
                     }`}
                   >
                     <Power className="h-3 w-3 shrink-0" />
-                    {isEnabled ? 'ĐANG BẬT' : 'ĐÃ TẮT'}
+                    {isEnabled ? 'Bật' : 'Tắt'}
                   </button>
                 </div>
 

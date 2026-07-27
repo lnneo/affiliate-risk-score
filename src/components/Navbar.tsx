@@ -30,7 +30,7 @@ export default function Navbar() {
 
   const navItems = [
     { href: '/', label: 'Giả lập Gian lận', icon: PlayCircle },
-    { href: '/referral', label: 'Tạo Link Thật (Test Máy Thật)', icon: Share2 },
+    { href: '/referral', label: 'Tạo Link Thật', icon: Share2 },
     { href: '/store', label: 'Cửa hàng Mua hàng', icon: ShoppingBag },
     { href: '/admin/dashboard', label: 'Nhật ký Audit Admin', icon: LayoutDashboard },
     { href: '/admin/config', label: 'Cấu hình Luật', icon: Sliders },
@@ -91,7 +91,7 @@ export default function Navbar() {
             title="Nạp dữ liệu thử nghiệm mẫu"
           >
             <Sparkles className={`h-3.5 w-3.5 text-amber-400 ${seeding ? 'animate-spin' : ''}`} />
-            {seeding ? 'Đang nạp...' : 'Nạp Dữ liệu Mẫu'}
+            {seeding ? 'Đang nạp...' : 'Nạp dữ liệu'}
           </button>
         </div>
       </div>

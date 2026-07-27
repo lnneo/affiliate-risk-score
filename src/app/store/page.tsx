@@ -215,11 +215,11 @@ function StoreCheckoutContent() {
             >
               {evaluating ? (
                 <>
-                  <RefreshCw className="h-5 w-5 animate-spin shrink-0" /> <span>Đang Thanh toán & Đánh giá Risk...</span>
+                  <RefreshCw className="h-5 w-5 animate-spin shrink-0" /> <span>Đang thanh toán...</span>
                 </>
               ) : (
                 <>
-                  <ShoppingBag className="h-5 w-5 shrink-0" /> <span>Thanh toán Đơn hàng ($99.00)</span>
+                  <ShoppingBag className="h-5 w-5 shrink-0" /> <span>Thanh toán</span>
                 </>
               )}
             </button>
@@ -235,7 +235,7 @@ function StoreCheckoutContent() {
               </div>
               <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đặt hàng & Đánh giá</h3>
               <p className="text-xs text-slate-400 max-w-md">
-                Bấm nút &ldquo;Thanh toán Đơn hàng&rdquo; để mô phỏng một giao dịch thực tế. Kết quả đánh giá Risk Engine sẽ xuất hiện tại đây và được lưu vào CSDL Admin Audit Ledger.
+                Bấm nút &ldquo;Thanh toán&rdquo; để mô phỏng một giao dịch thực tế. Kết quả đánh giá Risk Engine sẽ xuất hiện tại đây và được lưu vào CSDL Admin Audit Ledger.
               </p>
             </div>
           )}

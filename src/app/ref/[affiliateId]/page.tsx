@@ -110,7 +110,7 @@ export default function RealReferralLandingPage({ params }: { params: Promise<{ 
                 onClick={() => router.push(`/store?affiliateId=${affiliateId}&cookieId=${clickResult?.cookieId}&fp=${realFingerprint}`)}
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 to-indigo-600 font-bold text-white shadow-lg shadow-emerald-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2"
               >
-                <span>Chuyển đến Cửa hàng Mua hàng Ngay</span> <ArrowRight className="h-4 w-4 shrink-0" />
+                <span>Chuyển đến cửa hàng</span> <ArrowRight className="h-4 w-4 shrink-0" />
               </button>
             </div>
           </div>
