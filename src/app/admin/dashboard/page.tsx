@@ -74,25 +74,25 @@ export default function AdminDashboardPage() {
   const rejected = data.filter((d) => d.decision === 'REJECT').length;
 
   return (
-    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col">
+    <div className="min-h-screen bg-[#090d16] text-slate-100 flex flex-col overflow-x-hidden">
       <Navbar />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 space-y-8">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 sm:px-6 space-y-8 min-w-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2">
-              <Layers className="h-6 w-6 text-indigo-400" />
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 min-w-0">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-bold text-slate-100 flex items-center gap-2 break-words">
+              <Layers className="h-6 w-6 text-indigo-400 shrink-0" />
               Nhật ký Audit Điểm Rủi ro Affiliate (Admin Ledger)
             </h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-slate-400 break-words">
               Đối soát toàn bộ giao dịch được đánh giá, soi chi tiết các tín hiệu gian lận và thực hiện ghi đè quyết định duyệt/từ chối hoa hồng.
             </p>
           </div>
 
           <button
             onClick={fetchRiskScores}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800"
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
             Làm mới Bảng
@@ -100,34 +100,34 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Overview Metric Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <div className="glass-card p-4 rounded-xl border border-slate-800">
-            <span className="text-xs text-slate-400 font-medium">Tổng Đã Đánh Giá</span>
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 min-w-0">
+          <div className="glass-card p-4 rounded-xl border border-slate-800 min-w-0">
+            <span className="text-xs text-slate-400 font-medium truncate block">Tổng Đã Đánh Giá</span>
             <span className="text-2xl font-bold text-slate-100 block mt-1">{total}</span>
           </div>
-          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500">
-            <span className="text-xs text-emerald-400 font-medium">Đã Duyệt (Approve)</span>
+          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-emerald-500 min-w-0">
+            <span className="text-xs text-emerald-400 font-medium truncate block">Đã Duyệt (Approve)</span>
             <span className="text-2xl font-bold text-emerald-400 block mt-1">{approved}</span>
           </div>
-          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-blue-500">
-            <span className="text-xs text-blue-400 font-medium">Tạm Giữ Chờ Duyệt</span>
+          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-blue-500 min-w-0">
+            <span className="text-xs text-blue-400 font-medium truncate block">Tạm Giữ Chờ Duyệt</span>
             <span className="text-2xl font-bold text-blue-400 block mt-1">{pending}</span>
           </div>
-          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-amber-500">
-            <span className="text-xs text-amber-400 font-medium">Cần Kiểm Tra Thủ Công</span>
+          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-amber-500 min-w-0">
+            <span className="text-xs text-amber-400 font-medium truncate block">Cần Kiểm Tra Thủ Công</span>
             <span className="text-2xl font-bold text-amber-400 block mt-1">{manual}</span>
           </div>
-          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-rose-500">
-            <span className="text-xs text-rose-400 font-medium">Đã Từ Chối (Reject)</span>
+          <div className="glass-card p-4 rounded-xl border border-slate-800 border-l-4 border-l-rose-500 min-w-0">
+            <span className="text-xs text-rose-400 font-medium truncate block">Đã Từ Chối (Reject)</span>
             <span className="text-2xl font-bold text-rose-400 block mt-1">{rejected}</span>
           </div>
         </div>
 
         {/* Filter Controls */}
-        <div className="flex items-center justify-between gap-4 bg-slate-900/60 p-2 rounded-xl border border-slate-800">
-          <div className="flex items-center gap-2 text-xs">
-            <Filter className="h-4 w-4 text-slate-400 ml-2" />
-            <span className="text-slate-400 font-medium">Lọc theo Quyết định:</span>
+        <div className="flex items-center justify-between gap-4 bg-slate-900/60 p-2 rounded-xl border border-slate-800 overflow-x-auto max-w-full">
+          <div className="flex items-center gap-2 text-xs shrink-0">
+            <Filter className="h-4 w-4 text-slate-400 ml-2 shrink-0" />
+            <span className="text-slate-400 font-medium shrink-0">Lọc theo Quyết định:</span>
             {[
               { key: 'ALL', label: 'TẤT CẢ' },
               { key: 'APPROVE', label: 'DUYỆT (APPROVE)' },
@@ -138,7 +138,7 @@ export default function AdminDashboardPage() {
               <button
                 key={dec.key}
                 onClick={() => setFilterDecision(dec.key)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shrink-0 ${
                   filterDecision === dec.key
                     ? 'bg-indigo-600 text-white shadow-sm'
                     : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
@@ -151,9 +151,9 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Risk Scores Table */}
-        <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs">
+        <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden max-w-full">
+          <div className="overflow-x-auto max-w-full">
+            <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
                 <tr>
                   <th className="px-4 py-3">Mã Đơn hàng / Thời gian</th>
@@ -174,18 +174,18 @@ export default function AdminDashboardPage() {
                 ) : (
                   data.map((item) => (
                     <tr key={item.risk_score_id} className="hover:bg-slate-900/40 transition-colors">
-                      <td className="px-4 py-3.5 font-mono">
-                        <div className="font-bold text-slate-200">{item.order_id}</div>
+                      <td className="px-4 py-3.5 font-mono max-w-[180px] break-all">
+                        <div className="font-bold text-slate-200 break-all">{item.order_id}</div>
                         <div className="text-[10px] text-slate-500">{new Date(item.created_at).toLocaleString('vi-VN')}</div>
                       </td>
 
-                      <td className="px-4 py-3.5">
-                        <div className="font-semibold text-slate-200">{item.user_email}</div>
-                        <div className="text-[11px] text-indigo-400">Ref: {item.affiliate_id}</div>
-                        <div className="text-[10px] text-slate-500 font-mono">IP: {item.ip}</div>
+                      <td className="px-4 py-3.5 max-w-[220px] break-all">
+                        <div className="font-semibold text-slate-200 break-all">{item.user_email}</div>
+                        <div className="text-[11px] text-indigo-400 break-all">Ref: {item.affiliate_id}</div>
+                        <div className="text-[10px] text-slate-500 font-mono break-all">IP: {item.ip}</div>
                       </td>
 
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <div className="flex items-center gap-2">
                           <span className={`text-sm font-black ${
                             item.total_score >= 100 ? 'text-rose-400' :
@@ -206,13 +206,13 @@ export default function AdminDashboardPage() {
                         </div>
                       </td>
 
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 max-w-[260px]">
                         {item.signals.length === 0 ? (
                           <span className="text-[11px] text-emerald-400 font-medium">Sạch (0 tín hiệu)</span>
                         ) : (
                           <div className="flex flex-wrap gap-1">
                             {item.signals.map((sig: any, idx: number) => (
-                              <span key={idx} className="bg-slate-800 text-rose-300 border border-slate-700 px-1.5 py-0.5 rounded text-[10px]">
+                              <span key={idx} className="bg-slate-800 text-rose-300 border border-slate-700 px-1.5 py-0.5 rounded text-[10px] break-all">
                                 {sig.signal_type} (+{sig.score})
                               </span>
                             ))}
@@ -220,7 +220,7 @@ export default function AdminDashboardPage() {
                         )}
                       </td>
 
-                      <td className="px-4 py-3.5">
+                      <td className="px-4 py-3.5 whitespace-nowrap">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-semibold ${
                           item.review_status === 'APPROVED' ? 'bg-emerald-500/20 text-emerald-300' :
                           item.review_status === 'REJECTED' ? 'bg-rose-500/20 text-rose-300' :
@@ -231,7 +231,7 @@ export default function AdminDashboardPage() {
                         </span>
                       </td>
 
-                      <td className="px-4 py-3.5 text-right space-x-2">
+                      <td className="px-4 py-3.5 text-right space-x-2 whitespace-nowrap">
                         <button
                           onClick={() => setSelectedRecord(item)}
                           className="px-2.5 py-1 rounded bg-indigo-600/20 hover:bg-indigo-600/40 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium"
@@ -250,74 +250,79 @@ export default function AdminDashboardPage() {
         {/* Modal: Inspection Detail */}
         {selectedRecord && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="glass-card max-w-2xl w-full rounded-2xl border border-slate-800 p-6 space-y-6 max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4">
-                <h3 className="font-bold text-lg text-slate-100">Chi tiết Audit Tín hiệu Gian lận</h3>
+            <div className="glass-card max-w-2xl w-full rounded-2xl border border-slate-800 p-6 space-y-6 max-h-[90vh] overflow-y-auto min-w-0">
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4 min-w-0">
+                <h3 className="font-bold text-lg text-slate-100 break-words">Chi tiết Audit Tín hiệu Gian lận</h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
-                  className="text-slate-400 hover:text-slate-200 font-bold text-lg"
+                  className="text-slate-400 hover:text-slate-200 font-bold text-lg p-1 shrink-0"
                 >
                   ✕
                 </button>
               </div>
 
-              <div className="space-y-4 text-xs">
+              <div className="space-y-4 text-xs min-w-0">
                 {/* Side by side comparison */}
-                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3">
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 min-w-0">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                    <ArrowRightLeft className="h-4 w-4" /> Bảng Đối soát: Người Mua vs Người Giới Thiệu ({selectedRecord.affiliate_id})
+                    <ArrowRightLeft className="h-4 w-4 shrink-0" /> Bảng Đối soát: Người Mua vs Người Giới Thiệu ({selectedRecord.affiliate_id})
                   </h4>
-                  <div className="grid grid-cols-2 gap-4 text-xs font-mono">
-                    <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs font-mono min-w-0">
+                    <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
                       <span className="text-[10px] font-sans text-slate-400 block font-semibold">Thông tin Đơn hàng Người Mua:</span>
-                      <div>Email: <span className={selectedRecord.user_email.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.user_email}</span></div>
-                      <div>PayPal: <span className={selectedRecord.payment_account.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.payment_account}</span></div>
-                      <div>Fingerprint: <span className={selectedRecord.fingerprint_hash?.includes('john_macbook') ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.fingerprint_hash || 'N/A'}</span></div>
-                      <div>IP: <span className={selectedRecord.ip === AFFILIATE_PROMOTER.registeredIp ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.ip}</span></div>
+                      <div className="break-all">Email: <span className={selectedRecord.user_email.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.user_email}</span></div>
+                      <div className="break-all">PayPal: <span className={selectedRecord.payment_account.includes(selectedRecord.affiliate_id) ? 'text-rose-400 font-bold' : 'text-slate-200'}>{selectedRecord.payment_account}</span></div>
+                      <div className="break-all">Fingerprint: <span className={selectedRecord.fingerprint_hash?.includes('john_macbook') ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.fingerprint_hash || 'N/A'}</span></div>
+                      <div className="break-all">IP: <span className={selectedRecord.ip === AFFILIATE_PROMOTER.registeredIp ? 'text-amber-400 font-bold' : 'text-slate-200'}>{selectedRecord.ip}</span></div>
                     </div>
-                    <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800">
+                    <div className="space-y-1 bg-slate-900/60 p-3 rounded-lg border border-slate-800 min-w-0">
                       <span className="text-[10px] font-sans text-indigo-400 block font-semibold">Hồ sơ Gốc Affiliate (John Doe):</span>
-                      <div>Email: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
-                      <div>PayPal: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
-                      <div>Fingerprint: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
-                      <div>IP: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
+                      <div className="break-all">Email: <span className="text-slate-200">{AFFILIATE_PROMOTER.email}</span></div>
+                      <div className="break-all">PayPal: <span className="text-slate-200">{AFFILIATE_PROMOTER.paymentAccount}</span></div>
+                      <div className="break-all">Fingerprint: <span className="text-indigo-400 font-bold">{AFFILIATE_PROMOTER.deviceFingerprint}</span></div>
+                      <div className="break-all">IP: <span className="text-slate-200">{AFFILIATE_PROMOTER.registeredIp}</span></div>
                     </div>
                   </div>
                 </div>
 
                 {/* Signals Tree */}
-                <div className="space-y-2">
+                <div className="space-y-2 min-w-0">
                   <h4 className="font-bold text-slate-300">Cây Tín hiệu Gian lận & Giải thích Chi tiết:</h4>
                   {selectedRecord.signals.length === 0 ? (
                     <div className="p-3 rounded bg-emerald-500/10 text-emerald-400">Không có tín hiệu gian lận nào.</div>
                   ) : (
                     selectedRecord.signals.map((sig: any, i: number) => (
-                      <div key={i} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1">
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-rose-400">{sig.signal_type}</span>
-                          <span className="font-bold text-rose-400">+{sig.score} điểm</span>
+                      <div key={i} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="font-bold text-rose-400 break-all">{sig.signal_type}</span>
+                          <span className="font-bold text-rose-400 shrink-0">+{sig.score} điểm</span>
                         </div>
-                        <p className="text-slate-300 leading-relaxed">{sig.reason}</p>
+                        <p className="text-slate-300 leading-relaxed break-words">{sig.reason}</p>
+                        {sig.metadata_json && (
+                          <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">
+                            {sig.metadata_json}
+                          </div>
+                        )}
                       </div>
                     ))
                   )}
                 </div>
 
                 {/* Manual Override Buttons */}
-                <div className="pt-4 border-t border-slate-800 space-y-3">
+                <div className="pt-4 border-t border-slate-800 space-y-3 min-w-0">
                   <span className="font-bold text-slate-300 block">Thao tác Ghi đè Quyết định (Manual Override):</span>
-                  <div className="flex items-center gap-3">
+                  <div className="flex flex-col sm:flex-row items-center gap-3">
                     <button
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'APPROVED')}
-                      className="flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                      className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                     >
-                      <ThumbsUp className="h-3.5 w-3.5" /> Duyệt Hoa Hồng (Approve)
+                      <ThumbsUp className="h-3.5 w-3.5 shrink-0" /> Duyệt Hoa Hồng (Approve)
                     </button>
                     <button
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'REJECTED')}
-                      className="flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                      className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
                     >
-                      <ThumbsDown className="h-3.5 w-3.5" /> Từ Chối Hoa Hồng (Reject)
+                      <ThumbsDown className="h-3.5 w-3.5 shrink-0" /> Từ Chối Hoa Hồng (Reject)
                     </button>
                   </div>
                 </div>
