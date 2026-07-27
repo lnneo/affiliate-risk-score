@@ -3,6 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 import { defaultRuleStatements, defaultSeedStatements, schemaStatements, type SqlStatement } from './db-schema';
+import { getTursoConfig } from './turso-config';
 
 type SqlPrimitive = string | number | bigint | ArrayBuffer | Uint8Array | null;
 type QueryArgs = ReadonlyArray<SqlPrimitive | boolean | undefined>;
@@ -29,13 +30,7 @@ function createDbClient(): Client {
   }
 
   if (useTurso) {
-    const url = process.env.TURSO_DATABASE_URL;
-    const authToken = process.env.TURSO_AUTH_TOKEN;
-
-    if (!url || !authToken) {
-      throw new Error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN for production Turso database access');
-    }
-
+    const { url, authToken } = getTursoConfig();
     return createClient({ url, authToken });
   }
 
@@ -181,14 +176,7 @@ export function getLocalDbUrl(): string {
 }
 
 export function getTursoConnectionConfig(): { url: string; authToken: string } {
-  const url = process.env.TURSO_DATABASE_URL;
-  const authToken = process.env.TURSO_AUTH_TOKEN;
-
-  if (!url || !authToken) {
-    throw new Error('Missing TURSO_DATABASE_URL or TURSO_AUTH_TOKEN');
-  }
-
-  return { url, authToken };
+  return getTursoConfig();
 }
 
 export const db = {
