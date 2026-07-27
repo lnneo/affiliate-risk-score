@@ -1,11 +1,11 @@
 # LinkPul Affiliate Risk Score Engine - Feature History Ledger
 
 ## Feature Summary
-Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị liên kết **LinkPul** bao phủ 100% tiêu chuẩn Tapfiliate Enterprise Anti-Fraud Specs với 15 thuật toán phát hiện gian lận đa tín hiệu, hỗ trợ IP đen động wildcard (`192.168.100.*`), đối soát phần cứng đa trình duyệt, trang thử nghiệm thiết bị thật, giao diện Quản trị Admin, chuẩn hóa nút bấm thành Động từ ngắn gọn, cấu hình pnpm & Node 22 SDK, và đã đồng bộ hóa với Git Remote (`https://github.com/lnneo/affiliate-risk-score.git`).
+Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị liên kết **LinkPul** bao phủ 100% tiêu chuẩn Tapfiliate Enterprise Anti-Fraud Specs với 15 thuật toán phát hiện gian lận đa tín hiệu, hỗ trợ IP đen động wildcard (`192.168.100.*`), đối soát phần cứng đa trình duyệt, trang thử nghiệm thiết bị thật, giao diện Quản trị Admin, chuẩn hóa nút bấm thành Động từ ngắn gọn, cấu hình pnpm & Node 22 SDK, và đã đặt nhánh `develop` về gốc ban đầu để mở Pull Request hoàn chỉnh.
 
-- **Source Branch**: `main`
-- **Target Branch**: `main`
-- **Working Branch**: `feature/linkpul-affiliate-risk-score`
+- **Source Branch**: `main` (`a4bb835`)
+- **Target Branch**: `develop` (`a4bb835`)
+- **Working Branch**: `feature/linkpul-affiliate-risk-score` (`ec48dde`)
 - **Remote Origin**: `https://github.com/lnneo/affiliate-risk-score.git`
 - **Base Commit**: `a4bb835`
 
@@ -42,7 +42,7 @@ Hệ thống tính điểm rủi ro và phát hiện gian lận Tiếp thị li�
 ## Verification Performed
 - `pnpm test`: Passed 5/5 test suites.
 - `pnpm build`: Production build completed cleanly with Next.js Turbopack.
-- Remote push verified: `main`, `develop`, `feature/linkpul-affiliate-risk-score` pushed to `https://github.com/lnneo/affiliate-risk-score.git`.
+- Remote push verified: PR ready from `feature/linkpul-affiliate-risk-score` into `develop` (`https://github.com/lnneo/affiliate-risk-score/compare/develop...feature/linkpul-affiliate-risk-score`).
 
 ---
 
