@@ -121,13 +121,15 @@ export default function SimulatorPage() {
     setClickResult(null);
     setEvaluationResult(null);
 
+    const sessionCookieId = `${formData.cookieId}_${Date.now()}`;
+
     try {
       const clickRes = await fetch('/api/tracking/click', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           affiliateId: formData.affiliateId,
-          cookieId: formData.cookieId,
+          cookieId: sessionCookieId,
           fingerprintHash: formData.fingerprintHash,
           ip: formData.ip,
           country: formData.country,
@@ -142,7 +144,10 @@ export default function SimulatorPage() {
       const checkoutRes = await fetch('/api/checkout/evaluate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          cookieId: sessionCookieId,
+        }),
       });
       const evalData = await checkoutRes.json();
       setEvaluationResult(evalData.evaluation);
@@ -213,12 +218,13 @@ export default function SimulatorPage() {
         </div>
 
         {/* Simulator presets */}
-        <div className="space-y-4 min-w-0">
-          <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-              Giả lập theo trạng thái quyết định:
-            </label>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="glass-card rounded-2xl border border-slate-800 p-4 sm:p-5 space-y-4 min-w-0">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
+            <div className="min-w-0">
+              <h2 className="text-sm font-bold text-slate-200">Giả lập theo trạng thái</h2>
+              <p className="text-[11px] text-slate-500 mt-0.5">Chọn trạng thái, lọc rule, rồi chọn kịch bản mẫu.</p>
+            </div>
+            <div className="flex flex-wrap gap-2">
               {DECISION_STATES.map((state) => {
                 const isActive = selectedDecision === state.key;
                 return (
@@ -226,57 +232,52 @@ export default function SimulatorPage() {
                     key={state.key}
                     type="button"
                     onClick={() => handleDecisionChange(state.key)}
-                    className={`text-left p-4 rounded-xl border transition-all min-w-0 ${
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
                       isActive
-                        ? `bg-slate-900/70 shadow-lg ${DECISION_TAB_CLASS[state.key]}`
-                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+                        ? `bg-slate-900/80 ${DECISION_TAB_CLASS[state.key]}`
+                        : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:border-slate-700'
                     }`}
                   >
-                    <div className="font-semibold text-sm text-slate-100">{state.label}</div>
-                    <div className="text-[11px] text-slate-400 mt-1">{state.scoreRange}</div>
-                    <div className="text-[10px] text-slate-500 mt-2">
-                      {getScenariosByDecision(state.key).length} kịch bản
-                    </div>
+                    {state.label}
+                    <span className="text-slate-500 font-normal"> · {state.scoreRange}</span>
                   </button>
                 );
               })}
             </div>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-              Lọc theo rule kích hoạt:
-            </label>
-            <div className="flex flex-wrap gap-2">
+          {ruleFilters.length > 0 ? (
+            <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-3">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 shrink-0">Rule:</span>
               <button
                 type="button"
                 onClick={() => handleRuleFilterChange('ALL')}
-                className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                className={`px-2.5 py-1 rounded-md text-[10px] font-semibold border transition-all ${
                   selectedRuleFilter === 'ALL'
                     ? 'bg-indigo-600 text-white border-indigo-500'
-                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
+                    : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
                 }`}
               >
-                TẤT CẢ
+                Tất cả
               </button>
               {ruleFilters.map((rule) => (
                 <button
                   key={rule}
                   type="button"
                   onClick={() => handleRuleFilterChange(rule)}
-                  className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all font-mono ${
+                  className={`px-2.5 py-1 rounded-md text-[10px] font-semibold border transition-all font-mono ${
                     selectedRuleFilter === rule
                       ? 'bg-indigo-600 text-white border-indigo-500'
-                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
+                      : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
                   }`}
                 >
                   {rule}
                 </button>
               ))}
             </div>
-          </div>
+          ) : null}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 border-t border-slate-800/80 pt-3">
             {visibleScenarios.map((scen) => {
               const isSelected = selectedScenarioId === scen.id;
               return (
@@ -284,20 +285,20 @@ export default function SimulatorPage() {
                   key={scen.id}
                   type="button"
                   onClick={() => handleScenarioChange(scen.id)}
-                  className={`text-left p-4 rounded-xl border transition-all glass-card-hover min-w-0 ${
+                  className={`text-left p-3 rounded-xl border transition-all min-w-0 ${
                     isSelected
-                      ? 'bg-indigo-950/40 border-indigo-500/80 shadow-lg shadow-indigo-950/50'
-                      : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+                      ? 'bg-indigo-950/40 border-indigo-500/80 shadow-md shadow-indigo-950/40'
+                      : 'bg-slate-950/50 border-slate-800 hover:border-slate-700'
                   }`}
                 >
-                  <div className="flex items-center justify-between gap-2 mb-2">
-                    <span className="font-semibold text-sm text-slate-100 truncate">{scen.name}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${DECISION_BADGE_CLASS[scen.decision]}`}>
+                  <div className="flex items-center justify-between gap-2 mb-1.5">
+                    <span className="font-semibold text-xs text-slate-100 truncate">{scen.name}</span>
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full border shrink-0 ${DECISION_BADGE_CLASS[scen.decision]}`}>
                       {scen.expectedScore}
                     </span>
                   </div>
-                  <div className="text-[10px] font-mono text-indigo-300 mb-2 break-all">{scen.primaryRule}</div>
-                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words">{scen.description}</p>
+                  <div className="text-[10px] font-mono text-indigo-300 mb-1 break-all">{scen.primaryRule}</div>
+                  <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed break-words">{scen.description}</p>
                 </button>
               );
             })}
