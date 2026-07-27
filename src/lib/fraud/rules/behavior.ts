@@ -38,6 +38,12 @@ export async function evaluateBehaviorRules(
         type: 'VELOCITY_EXCEEDED',
         score: velocityWeight,
         reason: `High velocity detected: ${ipVelocity?.count || 0} orders from IP ${order.ip} within 10 minutes`,
+        reasonKey: 'velocityExceeded',
+        reasonParams: {
+          ordersLast10Min: ipVelocity?.count || 0,
+          ip: order.ip,
+          clicksLast5Min: clickVelocity?.count || 0,
+        },
         metadata: {
           ordersLast10Min: ipVelocity?.count || 0,
           clicksLast5Min: clickVelocity?.count || 0,

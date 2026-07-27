@@ -344,6 +344,31 @@ export const en: Dictionary = {
       scoreRange: '≥ 100',
     },
   },
+  fraudReasons: {
+    selfReferral: 'Buyer email ({buyerEmail}) matches affiliate email ({affiliateEmail})',
+    samePaymentAccount:
+      'Payment account ({paymentAccount}) matches affiliate account ({affiliatePayment}) or a prior self-referral order',
+    sameCookie:
+      'Browser cookie ({cookiePreview}) is linked to an affiliate admin session or shared across multiple accounts',
+    sameFingerprint:
+      'Device fingerprint ({fingerprintPreview}) directly matches affiliate device ({affiliateFpPreview})',
+    hardwareClusterFingerprint:
+      'Duplicate hardware cluster detected (same IP + OS {os} + screen {screen}) between new browser and affiliate device',
+    disposableEmail: 'Email domain (@{domain}) is on the disposable/temporary email provider list',
+    sameIp: 'IP address ({ip}) matches affiliate IP ({affiliateIp})',
+    vpnUsage: 'IP address ({ip}) detected as a commercial VPN service',
+    datacenterIp: 'IP address ({ip}) belongs to a cloud datacenter ASN range',
+    velocityExceeded:
+      'High velocity detected: {ordersLast10Min} orders from IP {ip} within 10 minutes ({clicksLast5Min} affiliate clicks in 5 minutes)',
+    ipBlacklisted: 'IP address ({ip}) matches dynamic blacklist range ({matchedPattern}): {blacklistReason}',
+    referrerSpamBlacklisted:
+      'Referrer page ({referrer}) is on the banned referrer spam/cloaking network: {blacklistReason}',
+    referrerCloaking: 'Referrer string uses traffic source cloaking (URL cloaking)',
+    suspiciousGeolocation: 'Click/purchase originated from high-risk country ({country}) outside target market',
+    clickInflationNoConversion:
+      'Affiliate generated {clicks24h} clicks in 24h with 0% conversion rate (CTR spam)',
+    duplicateConversion: 'Customer/order ID ({externalCustomerId}) was already credited with commission',
+  },
   refLanding: {
     loadingTitle: 'Collecting Real Fingerprint...',
     loadingBody: 'FingerprintJS is measuring the real hardware parameters of this device\'s browser.',

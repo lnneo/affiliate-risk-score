@@ -259,6 +259,24 @@ export type Dictionary = {
     MANUAL_REVIEW: { label: string; badge: string; filter: string; scoreRange: string };
     REJECT: { label: string; badge: string; filter: string; scoreRange: string };
   };
+  fraudReasons: {
+    selfReferral: string;
+    samePaymentAccount: string;
+    sameCookie: string;
+    sameFingerprint: string;
+    hardwareClusterFingerprint: string;
+    disposableEmail: string;
+    sameIp: string;
+    vpnUsage: string;
+    datacenterIp: string;
+    velocityExceeded: string;
+    ipBlacklisted: string;
+    referrerSpamBlacklisted: string;
+    referrerCloaking: string;
+    suspiciousGeolocation: string;
+    clickInflationNoConversion: string;
+    duplicateConversion: string;
+  };
   refLanding: {
     loadingTitle: string;
     loadingBody: string;
@@ -621,6 +639,33 @@ export const vi: Dictionary = {
       filter: 'TỪ CHỐI (REJECT)',
       scoreRange: '≥ 100',
     },
+  },
+  fraudReasons: {
+    selfReferral: 'Email người mua ({buyerEmail}) trùng với Email người giới thiệu ({affiliateEmail})',
+    samePaymentAccount:
+      'Tài khoản thanh toán ({paymentAccount}) trùng với tài khoản Affiliate ({affiliatePayment}) hoặc đơn mua tự giới thiệu trước đó',
+    sameCookie:
+      'Cookie trình duyệt ({cookiePreview}) liên quan đến phiên quản trị Affiliate hoặc dùng chung nhiều tài khoản',
+    sameFingerprint:
+      'Vân tay thiết bị ({fingerprintPreview}) trùng khớp trực tiếp với thiết bị Affiliate ({affiliateFpPreview})',
+    hardwareClusterFingerprint:
+      'Phát hiện cụm thiết bị phần cứng trùng lặp (Cùng IP + Cùng OS {os} + Màn hình {screen}) giữa trình duyệt mới và máy Affiliate',
+    disposableEmail: 'Tên miền email (@{domain}) thuộc danh sách nhà cung cấp email rác/tạm thời',
+    sameIp: 'Địa chỉ IP ({ip}) trùng khớp với địa chỉ IP của Affiliate ({affiliateIp})',
+    vpnUsage: 'Địa chỉ IP ({ip}) bị phát hiện là dịch vụ VPN thương mại',
+    datacenterIp: 'Địa chỉ IP ({ip}) thuộc dải máy chủ Cloud Datacenter ASN',
+    velocityExceeded:
+      'Phát hiện tốc độ bất thường: {ordersLast10Min} đơn hàng từ IP {ip} trong 10 phút ({clicksLast5Min} click affiliate trong 5 phút)',
+    ipBlacklisted:
+      'Địa chỉ IP ({ip}) khớp với dải IP Đen động ({matchedPattern}): {blacklistReason}',
+    referrerSpamBlacklisted:
+      'Trang giới thiệu ({referrer}) thuộc mạng lưới Referrer Spam / Cloaking bị cấm: {blacklistReason}',
+    referrerCloaking: 'Chuỗi Referrer dùng kỹ thuật ẩn giấu nguồn traffic (Url Cloaking)',
+    suspiciousGeolocation:
+      'Lượt nhấp/mua hàng đến từ quốc gia rủi ro cao ({country}) nằm ngoài thị trường mục tiêu',
+    clickInflationNoConversion:
+      'Affiliate tạo ra {clicks24h} lượt click trong 24h nhưng tỷ lệ chuyển đổi = 0% (Spam CTR ảo)',
+    duplicateConversion: 'Mã khách hàng/đơn hàng ({externalCustomerId}) đã được ghi nhận hoa hồng trước đó',
   },
   refLanding: {
     loadingTitle: 'Đang Thu thập Fingerprint Thật...',

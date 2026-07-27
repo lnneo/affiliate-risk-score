@@ -6,7 +6,7 @@ import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
 import { useI18n } from '@/i18n/I18nProvider';
-import { replaceCount } from '@/i18n/format';
+import { replaceCount, resolveFraudSignalReason } from '@/i18n/format';
 import {
   DECISION_STATES,
   findScenarioById,
@@ -614,7 +614,9 @@ export default function SimulatorPage() {
                               <span className="font-bold text-xs text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 shrink-0">
                                 {sig.type}
                               </span>
-                              <span className="text-xs text-slate-200 font-medium break-words">{sig.reason}</span>
+                              <span className="text-xs text-slate-200 font-medium break-words">
+                                {resolveFraudSignalReason(sig, t.fraudReasons)}
+                              </span>
                             </div>
                             {sig.metadata && (
                               <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">

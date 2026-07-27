@@ -6,7 +6,7 @@ import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
 import { useI18n } from '@/i18n/I18nProvider';
-import { replaceCount } from '@/i18n/format';
+import { replaceCount, resolveFraudSignalReason } from '@/i18n/format';
 import { useSearchParams } from 'next/navigation';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { 
@@ -288,7 +288,9 @@ function StoreCheckoutContent() {
                             <span className="font-bold text-xs text-rose-300 bg-rose-500/10 px-2 py-0.5 rounded border border-rose-500/20 shrink-0">
                               {sig.type}
                             </span>
-                            <span className="text-xs text-slate-200 font-medium break-words">{sig.reason}</span>
+                            <span className="text-xs text-slate-200 font-medium break-words">
+                              {resolveFraudSignalReason(sig, t.fraudReasons)}
+                            </span>
                           </div>
                         </div>
                         <span className="text-sm font-black text-rose-400 bg-rose-950/40 px-2.5 py-1 rounded-lg border border-rose-800/50 shrink-0">
