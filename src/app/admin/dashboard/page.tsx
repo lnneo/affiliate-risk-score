@@ -250,8 +250,9 @@ export default function AdminDashboardPage() {
         {/* Modal: Inspection Detail */}
         {selectedRecord && (
           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-            <div className="glass-card max-w-2xl w-full rounded-2xl border border-slate-800 p-6 space-y-6 max-h-[90vh] overflow-y-auto min-w-0">
-              <div className="flex items-center justify-between border-b border-slate-800 pb-4 min-w-0">
+            <div className="glass-card max-w-2xl w-full rounded-2xl border border-slate-800 p-6 flex flex-col max-h-[85vh] overflow-hidden min-w-0">
+              {/* Header (Fixed) */}
+              <div className="flex items-center justify-between border-b border-slate-800 pb-4 shrink-0 min-w-0">
                 <h3 className="font-bold text-lg text-slate-100 break-words">Chi tiết Audit Tín hiệu Gian lận</h3>
                 <button
                   onClick={() => setSelectedRecord(null)}
@@ -261,9 +262,10 @@ export default function AdminDashboardPage() {
                 </button>
               </div>
 
-              <div className="space-y-4 text-xs min-w-0">
-                {/* Side by side comparison */}
-                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 min-w-0">
+              {/* Main Content Body */}
+              <div className="space-y-4 text-xs min-w-0 flex-1 flex flex-col overflow-hidden pt-4">
+                {/* Side by side comparison (Fixed, no scroll) */}
+                <div className="p-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-3 min-w-0 shrink-0">
                   <h4 className="text-xs font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
                     <ArrowRightLeft className="h-4 w-4 shrink-0" /> Bảng Đối soát: Người Mua vs Người Giới Thiệu ({selectedRecord.affiliate_id})
                   </h4>
@@ -285,31 +287,33 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
 
-                {/* Signals Tree */}
-                <div className="space-y-2 min-w-0">
-                  <h4 className="font-bold text-slate-300">Cây Tín hiệu Gian lận & Giải thích Chi tiết:</h4>
-                  {selectedRecord.signals.length === 0 ? (
-                    <div className="p-3 rounded bg-emerald-500/10 text-emerald-400">Không có tín hiệu gian lận nào.</div>
-                  ) : (
-                    selectedRecord.signals.map((sig: any, i: number) => (
-                      <div key={i} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1 min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <span className="font-bold text-rose-400 break-all">{sig.signal_type}</span>
-                          <span className="font-bold text-rose-400 shrink-0">+{sig.score} điểm</span>
-                        </div>
-                        <p className="text-slate-300 leading-relaxed break-words">{sig.reason}</p>
-                        {sig.metadata_json && (
-                          <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">
-                            {sig.metadata_json}
+                {/* Signals Tree (Isolated Scrollable Area) */}
+                <div className="space-y-2 min-w-0 flex-1 flex flex-col overflow-hidden">
+                  <h4 className="font-bold text-slate-300 shrink-0">Cây Tín hiệu Gian lận & Giải thích Chi tiết:</h4>
+                  <div className="overflow-y-auto flex-1 space-y-2.5 pr-1.5 max-h-[280px]">
+                    {selectedRecord.signals.length === 0 ? (
+                      <div className="p-3 rounded bg-emerald-500/10 text-emerald-400">Không có tín hiệu gian lận nào.</div>
+                    ) : (
+                      selectedRecord.signals.map((sig: any, i: number) => (
+                        <div key={i} className="p-3 rounded-lg bg-slate-900 border border-slate-800 space-y-1 min-w-0">
+                          <div className="flex items-center justify-between gap-2">
+                            <span className="font-bold text-rose-400 break-all">{sig.signal_type}</span>
+                            <span className="font-bold text-rose-400 shrink-0">+{sig.score} điểm</span>
                           </div>
-                        )}
-                      </div>
-                    ))
-                  )}
+                          <p className="text-slate-300 leading-relaxed break-words">{sig.reason}</p>
+                          {sig.metadata_json && (
+                            <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">
+                              {sig.metadata_json}
+                            </div>
+                          )}
+                        </div>
+                      ))
+                    )}
+                  </div>
                 </div>
 
-                {/* Manual Override Buttons */}
-                <div className="pt-4 border-t border-slate-800 space-y-3 min-w-0">
+                {/* Manual Override Buttons (Fixed at bottom) */}
+                <div className="pt-3 border-t border-slate-800 space-y-3 min-w-0 shrink-0">
                   <span className="font-bold text-slate-300 block">Thao tác Ghi đè Quyết định (Manual Override):</span>
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <button
