@@ -3,7 +3,8 @@
 ## 1. Task & Goal Summary
 - **Project Name**: LinkPul (Affiliate Fraud & Risk Score Engine)
 - **Goal**: Implement a production-grade, 100% compliant Affiliate Fraud Risk Engine adhering to [Tapfiliate Enterprise Anti-Fraud Specifications](https://support.tapfiliate.com/en/articles/5898063-fraud-prevention-monitoring-in-affiliate-marketing).
-- **Business Logic Specification**: Reference [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md) for full threshold matrices and 15 business rules.
+- **Business Logic Specification (English)**: Reference [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md)
+- **Business Logic Specification (Vietnamese)**: Reference [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md)
 - **Language & Stack**: TypeScript, Next.js App Router, TailwindCSS, `better-sqlite3`, FingerprintJS (OSS), Vitest.
 - **Current Branch**: `feature/linkpul-affiliate-risk-score`
 - **Latest Implementation Commit**: `ca9de02` (`feat: implement LinkPul 100% Tapfiliate Enterprise affiliate risk score engine`)
@@ -62,7 +63,7 @@ Key tables in `src/lib/db.ts`:
 
 ## 5. Instructions for Next AI Agent
 
-1. **Business Rules**: Check [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md) for business requirements.
+1. **Business Rules**: Check [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md) (EN) or [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md) (VI) for business requirements.
 2. **Development Server**: Run `npm run dev` to start dev server on `http://localhost:3000`.
 3. **Database Reset**: Call `POST http://localhost:3000/api/demo/seed` to re-seed initial test data if needed.
 4. **Adding Rules**: Extend rules under `src/lib/fraud/rules/` and register rule configs in `initDatabase()` in `src/lib/db.ts`.
