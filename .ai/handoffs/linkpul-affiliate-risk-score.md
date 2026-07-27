@@ -6,8 +6,10 @@
 - **Repository Remote**: `https://github.com/lnneo/affiliate-risk-score.git`
 - **Branches**:
   - `main`: Base initial commit (`a4bb835`)
-  - `develop`: Integration branch (`4af8b09`)
-  - `feature/linkpul-affiliate-risk-score`: Active feature branch (`4af8b09`)
+  - `develop`: Integration branch (`c458f3a`)
+  - `feature/ci-vercel-workflow`: Active Vercel CI/CD branch
+- **Vercel CI/CD Automation**: Robust GitHub Actions workflow `.github/workflows/deploy-vercel.yml` using `amondnet/vercel-action@v25` for auto-testing & Vercel deployment upon merge into `develop`.
+- **Vercel Deployment Compatibility**: Configured `serverExternalPackages: ['better-sqlite3']` in `next.config.ts` and dynamic writable database location (`os.tmpdir()`) in `src/lib/db.ts` to prevent `/var/task` read-only `ENOENT` / `EROFS` errors on Vercel Serverless Functions.
 - **Business Logic Specification (English)**: Reference [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md)
 - **Business Logic Specification (Vietnamese)**: Reference [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md)
 - **Language & Stack**: TypeScript, Next.js App Router, TailwindCSS, `better-sqlite3` (SQLite v3.53.3), FingerprintJS (OSS), Vitest, `pnpm`.
@@ -16,7 +18,7 @@
 
 ---
 
-## 2. Technical Architecture & Database Schema (`data/affiliate_fraud.db`)
+## 2. Technical Architecture & Database Schema (`data/affiliate_fraud.db` / `/tmp/linkpul_data/affiliate_fraud.db`)
 
 Key tables in `src/lib/db.ts`:
 - **`affiliate_profiles`**: Stores registered affiliate profiles (`affiliate_id`, `email`, `payment_account`, `registered_ip`, `registered_fingerprint_hash`).
@@ -34,7 +36,9 @@ Key tables in `src/lib/db.ts`:
 
 | File Path | Technical Description |
 | :--- | :--- |
-| `src/lib/db.ts` | SQLite DB connection (SQLite v3.53.3 via `better-sqlite3`), table schemas, migrations, and initial seed defaults. |
+| `.github/workflows/deploy-vercel.yml` | GitHub Actions workflow using `amondnet/vercel-action@v25` to automatically run unit tests and deploy artifacts to Vercel upon push to `develop`. |
+| `src/lib/db.ts` | SQLite DB connection (SQLite v3.53.3 via `better-sqlite3`), automatic `/tmp` path selection for Vercel Serverless runtime, table schemas, migrations, and initial seed defaults. |
+| `next.config.ts` | Next.js configuration declaring `serverExternalPackages: ['better-sqlite3']` for Vercel C++ native module compilation. |
 | `src/lib/fraud/types.ts` | Data types (`OrderContext`, `FraudSignal`, `RiskDecision`, `RiskEvaluationResult`). |
 | `src/lib/fraud/risk-engine.ts` | Main aggregator evaluating all 15 rules and persisting decisions. |
 | `src/lib/fraud/rules/identity.ts` | Evaluates `SELF_REFERRAL`, `SAME_PAYMENT_ACCOUNT`, `SAME_COOKIE`, `SAME_FINGERPRINT`, `SAME_HARDWARE_CLUSTER`, `DISPOSABLE_EMAIL`. |
@@ -61,8 +65,8 @@ Key tables in `src/lib/db.ts`:
 - **Production Build**:
   - Command: `pnpm build`
   - Result: Compiled successfully with Next.js Turbopack.
-- **Remote Synchronization**:
-  - Pushed to `https://github.com/lnneo/affiliate-risk-score.git` (`main`, `develop`, `feature/linkpul-affiliate-risk-score`).
+- **Vercel GitHub Workflow**:
+  - Updated to `amondnet/vercel-action@v25`.
 
 ---
 
@@ -72,4 +76,4 @@ Key tables in `src/lib/db.ts`:
 2. **Development Server**: Run `pnpm dev` to start dev server on `http://localhost:3000`.
 3. **Node Engine Requirement**: Use Node.js `>= 22.0.0` (as defined in `.nvmrc` and `package.json`).
 4. **Database Reset**: Call `POST http://localhost:3000/api/demo/seed` to re-seed initial test data if needed.
-5. **Git Workflow**: Push feature commits to `origin/feature/linkpul-affiliate-risk-score` and create PR to `origin/develop`.
+5. **Git Workflow**: Push feature commits to `origin/feature/ci-vercel-workflow` and create PR to `origin/develop`.
