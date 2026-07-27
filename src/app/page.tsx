@@ -5,6 +5,15 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
+import {
+  DECISION_STATES,
+  findScenarioById,
+  getRuleFiltersForDecision,
+  getScenariosByDecision,
+  SIMULATOR_SCENARIOS,
+  type SimulatorDecision,
+  type SimulatorFormData,
+} from '@/lib/simulator-scenarios';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -27,29 +36,6 @@ import {
   CopyCheck
 } from 'lucide-react';
 
-interface Scenario {
-  id: string;
-  name: string;
-  badge: string;
-  color: string;
-  description: string;
-  form: {
-    affiliateId: string;
-    userEmail: string;
-    userId: string;
-    paymentAccount: string;
-    ip: string;
-    cookieId: string;
-    fingerprintHash: string;
-    country: string;
-    referrer: string;
-    externalCustomerId: string;
-    isVpn: boolean;
-    isDatacenter: boolean;
-    amount: number;
-  };
-}
-
 const AFFILIATE_PROMOTER = {
   id: 'aff_john_doe',
   name: 'John Doe (Affiliate Promoter)',
@@ -59,109 +45,73 @@ const AFFILIATE_PROMOTER = {
   deviceFingerprint: 'fp_john_macbook_m2',
 };
 
-const PRESET_SCENARIOS: Scenario[] = [
-  {
-    id: 'clean',
-    name: 'Người dùng Hợp lệ',
-    badge: 'Dự kiến Duyệt (0 điểm)',
-    color: 'emerald',
-    description: 'Khách hàng Alice mua hàng từ thiết bị riêng, IP dân dụng, email & phương thức thanh toán hoàn toàn độc lập.',
-    form: {
-      affiliateId: 'aff_john_doe',
-      userId: 'usr_clean_alice',
-      userEmail: 'alice.smith@gmail.com',
-      paymentAccount: 'card_visa_9841',
-      ip: '24.180.12.99',
-      cookieId: 'ck_alice_session_1',
-      fingerprintHash: 'fp_alice_macbook_m1',
-      country: 'US',
-      referrer: 'https://techblog.com/review',
-      externalCustomerId: 'cust_alice_881',
-      isVpn: false,
-      isDatacenter: false,
-      amount: 149.00,
-    },
-  },
-  {
-    id: 'self_referral',
-    name: 'Tự giới thiệu (Self Referral)',
-    badge: 'Từ chối (+100 điểm)',
-    color: 'rose',
-    description: 'Affiliate John Doe tự dùng chính email và tài khoản PayPal của mình để mua hàng qua link giới thiệu.',
-    form: {
-      affiliateId: 'aff_john_doe',
-      userId: 'aff_john_doe',
-      userEmail: 'john_doe@affiliate.com',
-      paymentAccount: 'paypal_john_doe@affiliate.com',
-      ip: '118.69.182.10',
-      cookieId: 'ck_john_master_session',
-      fingerprintHash: 'fp_john_macbook_m2',
-      country: 'US',
-      referrer: 'https://techblog.com/review',
-      externalCustomerId: 'cust_john_self',
-      isVpn: false,
-      isDatacenter: false,
-      amount: 299.00,
-    },
-  },
-  {
-    id: 'blacklisted_ip',
-    name: 'IP Trong Danh Sách Đen',
-    badge: 'Từ chối (+100 điểm)',
-    color: 'rose',
-    description: 'Địa chỉ IP 198.51.100.99 nằm trong danh sách đen bảo mật (Security Blacklist) chuyên tạo click farm ảo.',
-    form: {
-      affiliateId: 'aff_john_doe',
-      userId: 'usr_bad_actor',
-      userEmail: 'bad.actor@example.com',
-      paymentAccount: 'card_bad_9910',
-      ip: '198.51.100.99',
-      cookieId: 'ck_bad_session_99',
-      fingerprintHash: 'fp_bad_actor_device',
-      country: 'US',
-      referrer: 'https://spam-ad-network.biz/redirect',
-      externalCustomerId: 'cust_bad_actor',
-      isVpn: false,
-      isDatacenter: false,
-      amount: 99.00,
-    },
-  },
-  {
-    id: 'duplicate_conversion',
-    name: 'Trùng Mã Khách Hàng',
-    badge: 'Từ chối (+100 điểm)',
-    color: 'purple',
-    description: 'Mã khách hàng cust_external_9999 đã được nhận hoa hồng trước đó, cố tình tạo đơn để nhận lại hoa hồng.',
-    form: {
-      affiliateId: 'aff_john_doe',
-      userId: 'usr_repeat_claim',
-      userEmail: 'repeat.claim@gmail.com',
-      paymentAccount: 'card_visa_0012',
-      ip: '203.0.113.44',
-      cookieId: 'ck_repeat_session',
-      fingerprintHash: 'fp_repeat_device',
-      country: 'US',
-      referrer: 'https://google.com',
-      externalCustomerId: 'cust_external_9999',
-      isVpn: false,
-      isDatacenter: false,
-      amount: 199.00,
-    },
-  },
-];
+const DECISION_BADGE_CLASS: Record<SimulatorDecision, string> = {
+  APPROVE: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
+  PENDING_REVIEW: 'bg-blue-500/10 text-blue-400 border-blue-500/20',
+  MANUAL_REVIEW: 'bg-amber-500/10 text-amber-400 border-amber-500/20',
+  REJECT: 'bg-rose-500/10 text-rose-400 border-rose-500/20',
+};
+
+const DECISION_TAB_CLASS: Record<SimulatorDecision, string> = {
+  APPROVE: 'border-emerald-500/40 text-emerald-300',
+  PENDING_REVIEW: 'border-blue-500/40 text-blue-300',
+  MANUAL_REVIEW: 'border-amber-500/40 text-amber-300',
+  REJECT: 'border-rose-500/40 text-rose-300',
+};
 
 export default function SimulatorPage() {
-  const [selectedScenario, setSelectedScenario] = useState<string>('clean');
-  const [formData, setFormData] = useState(PRESET_SCENARIOS[0].form);
+  const initialScenario = SIMULATOR_SCENARIOS[0];
+  const [selectedDecision, setSelectedDecision] = useState<SimulatorDecision>(initialScenario.decision);
+  const [selectedRuleFilter, setSelectedRuleFilter] = useState<string>('ALL');
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string>(initialScenario.id);
+  const [formData, setFormData] = useState<SimulatorFormData>(initialScenario.form);
 
   const [clickResult, setClickResult] = useState<any>(null);
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const { sourceRef: orderPanelRef, minHeight: orderPanelMinHeight } = useSyncedPanelMinHeight<HTMLDivElement>();
 
-  const handleScenarioChange = (scen: Scenario) => {
-    setSelectedScenario(scen.id);
-    setFormData(scen.form);
+  const ruleFilters = getRuleFiltersForDecision(selectedDecision);
+  const scenariosForDecision = getScenariosByDecision(selectedDecision);
+  const visibleScenarios =
+    selectedRuleFilter === 'ALL'
+      ? scenariosForDecision
+      : scenariosForDecision.filter((scenario) => scenario.ruleTypes.includes(selectedRuleFilter));
+
+  const handleDecisionChange = (decision: SimulatorDecision) => {
+    setSelectedDecision(decision);
+    setSelectedRuleFilter('ALL');
+    const firstScenario = getScenariosByDecision(decision)[0];
+    if (firstScenario) {
+      setSelectedScenarioId(firstScenario.id);
+      setFormData(firstScenario.form);
+      setClickResult(null);
+      setEvaluationResult(null);
+    }
+  };
+
+  const handleRuleFilterChange = (rule: string) => {
+    setSelectedRuleFilter(rule);
+    const nextScenarios =
+      rule === 'ALL'
+        ? getScenariosByDecision(selectedDecision)
+        : getScenariosByDecision(selectedDecision).filter((scenario) => scenario.ruleTypes.includes(rule));
+    const firstScenario = nextScenarios[0];
+    if (firstScenario) {
+      setSelectedScenarioId(firstScenario.id);
+      setFormData(firstScenario.form);
+      setClickResult(null);
+      setEvaluationResult(null);
+    }
+  };
+
+  const handleScenarioChange = (scenarioId: string) => {
+    const scenario = findScenarioById(scenarioId);
+    if (!scenario) {
+      return;
+    }
+    setSelectedScenarioId(scenario.id);
+    setFormData(scenario.form);
     setClickResult(null);
     setEvaluationResult(null);
   };
@@ -262,18 +212,78 @@ export default function SimulatorPage() {
           </p>
         </div>
 
-        {/* Preset Scenario Tabs */}
-        <div className="space-y-3 min-w-0">
-          <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
-            Chọn Kịch bản Giả lập Mẫu (15 Tapfiliate Rules):
-          </label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {PRESET_SCENARIOS.map((scen) => {
-              const isSelected = selectedScenario === scen.id;
+        {/* Simulator presets */}
+        <div className="space-y-4 min-w-0">
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+              Giả lập theo trạng thái quyết định:
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {DECISION_STATES.map((state) => {
+                const isActive = selectedDecision === state.key;
+                return (
+                  <button
+                    key={state.key}
+                    type="button"
+                    onClick={() => handleDecisionChange(state.key)}
+                    className={`text-left p-4 rounded-xl border transition-all min-w-0 ${
+                      isActive
+                        ? `bg-slate-900/70 shadow-lg ${DECISION_TAB_CLASS[state.key]}`
+                        : 'bg-slate-900/40 border-slate-800 hover:border-slate-700'
+                    }`}
+                  >
+                    <div className="font-semibold text-sm text-slate-100">{state.label}</div>
+                    <div className="text-[11px] text-slate-400 mt-1">{state.scoreRange}</div>
+                    <div className="text-[10px] text-slate-500 mt-2">
+                      {getScenariosByDecision(state.key).length} kịch bản
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-xs font-semibold uppercase tracking-wider text-slate-400 block">
+              Lọc theo rule kích hoạt:
+            </label>
+            <div className="flex flex-wrap gap-2">
+              <button
+                type="button"
+                onClick={() => handleRuleFilterChange('ALL')}
+                className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all ${
+                  selectedRuleFilter === 'ALL'
+                    ? 'bg-indigo-600 text-white border-indigo-500'
+                    : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
+                }`}
+              >
+                TẤT CẢ
+              </button>
+              {ruleFilters.map((rule) => (
+                <button
+                  key={rule}
+                  type="button"
+                  onClick={() => handleRuleFilterChange(rule)}
+                  className={`px-3 py-1.5 rounded-lg text-[11px] font-semibold border transition-all font-mono ${
+                    selectedRuleFilter === rule
+                      ? 'bg-indigo-600 text-white border-indigo-500'
+                      : 'bg-slate-900 text-slate-400 border-slate-800 hover:border-slate-700'
+                  }`}
+                >
+                  {rule}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {visibleScenarios.map((scen) => {
+              const isSelected = selectedScenarioId === scen.id;
               return (
                 <button
                   key={scen.id}
-                  onClick={() => handleScenarioChange(scen)}
+                  type="button"
+                  onClick={() => handleScenarioChange(scen.id)}
                   className={`text-left p-4 rounded-xl border transition-all glass-card-hover min-w-0 ${
                     isSelected
                       ? 'bg-indigo-950/40 border-indigo-500/80 shadow-lg shadow-indigo-950/50'
@@ -282,15 +292,11 @@ export default function SimulatorPage() {
                 >
                   <div className="flex items-center justify-between gap-2 mb-2">
                     <span className="font-semibold text-sm text-slate-100 truncate">{scen.name}</span>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${
-                      scen.color === 'emerald' ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' :
-                      scen.color === 'rose' ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' :
-                      scen.color === 'amber' ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' :
-                      'bg-purple-500/10 text-purple-400 border-purple-500/20'
-                    }`}>
-                      {scen.badge}
+                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border shrink-0 ${DECISION_BADGE_CLASS[scen.decision]}`}>
+                      {scen.expectedScore}
                     </span>
                   </div>
+                  <div className="text-[10px] font-mono text-indigo-300 mb-2 break-all">{scen.primaryRule}</div>
                   <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed break-words">{scen.description}</p>
                 </button>
               );
@@ -344,7 +350,12 @@ export default function SimulatorPage() {
                   Thông tin Đơn hàng & Người mua
                 </h2>
                 <button
-                  onClick={() => setFormData(PRESET_SCENARIOS.find(s => s.id === selectedScenario)?.form || formData)}
+                  onClick={() => {
+                    const scenario = findScenarioById(selectedScenarioId);
+                    if (scenario) {
+                      setFormData(scenario.form);
+                    }
+                  }}
                   className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 shrink-0 font-medium"
                 >
                   <RefreshCw className="h-3 w-3" /> Đặt lại

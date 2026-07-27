@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
+import TableOverlay from '@/components/TableOverlay';
 import { 
   Filter, 
   RefreshCw, 
@@ -157,9 +158,10 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Risk Scores Table */}
-        <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden max-w-full">
-          <div className="overflow-x-auto max-w-full">
-            <table className="w-full text-left text-xs min-w-[700px]">
+        <TableOverlay loading={loading} label="Đang tải nhật ký audit...">
+          <div className="glass-card rounded-2xl border border-slate-800 overflow-hidden max-w-full">
+            <div className="overflow-x-auto max-w-full">
+              <table className="w-full text-left text-xs min-w-[700px]">
               <thead className="bg-slate-950/80 border-b border-slate-800 text-slate-400 uppercase font-semibold text-[10px] tracking-wider">
                 <tr>
                   <th className="px-4 py-3">Mã Đơn hàng / Thời gian</th>
@@ -252,6 +254,7 @@ export default function AdminDashboardPage() {
             </table>
           </div>
         </div>
+        </TableOverlay>
 
         {/* Modal: Inspection Detail */}
         {selectedRecord && (
