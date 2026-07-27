@@ -68,3 +68,37 @@ The engine aggregates fraud signal weights into a total Risk Score and maps it t
     - **Business Logic**: External customer ID or transaction ID has already been credited for a commission previously.
 15. **`SUSPICIOUS_GEOLOCATION` (+30 pts)**:
     - **Business Logic**: Order originates from high-risk or non-target countries (e.g., KP, RU, IR).
+
+---
+
+## APPENDIX A: FINGERPRINT IDENTIFICATION LIBRARY
+
+### 1. FingerprintJS OSS Overview
+The **LinkPul Engine** integrates **FingerprintJS (Open-Source Edition)** running directly on the client-side browser.
+
+- **Purpose**: Generates a unique browser visitor ID based on hardware and browser environment characteristics without relying on cookies (Cookie-less Tracking). Even if a user clears cookies, switches accounts, or uses Incognito Mode, the visitor ID persists to flag fraud attempts.
+
+---
+
+### 2. Core Features & Captured Signals
+
+The library aggregates over 30 hardware and browser environment signals to construct a unique visitor hash:
+
+| Signal / Feature | Capture Mechanism & Principle | Anti-Fraud Application |
+| :--- | :--- | :--- |
+| **1. Canvas Fingerprinting** | Renders hidden text/graphics on HTML5 Canvas and extracts Base64 Data URL hashes. | Captures minute rendering differences across GPUs, graphics drivers, and font engines. |
+| **2. WebGL & GPU Fingerprinting** | Queries WebGL `Unmasked Vendor` & `Unmasked Renderer` (e.g., Apple M2, NVIDIA RTX 4070). | Identifies exact GPU graphics hardware and detects headless bot emulators (e.g., Puppeteer). |
+| **3. AudioContext Fingerprinting** | Creates audio oscillators to measure signal frequency processing by physical soundcards. | Exploits subtle hardware audio processing variances across physical devices. |
+| **4. Font Detection** | Measures rendered bounding boxes of standard fonts on Canvas to detect installed system fonts. | Traces user-installed system fonts on the OS. |
+| **5. Screen & Display Metrics** | Captures resolution (`width` x `height`), color depth, Device Pixel Ratio (DPR), and orientation. | Differentiates display types (e.g., Retina 2560x1600 vs Full HD 1920x1080). |
+| **6. CPU & Memory Environment** | Queries `navigator.hardwareConcurrency` (CPU cores) and `navigator.deviceMemory` (RAM GB). | Identifies core physical hardware specifications. |
+| **7. Browser & Timezone Environment** | Collects User-Agent, system timezone, browser languages, and touch screen support. | Distinguishes OS builds (macOS, Windows, iOS, Android) and physical timezone locations. |
+
+---
+
+### 3. Cross-Browser Hardware Clustering Mechanism
+- **Challenge**: FingerprintJS OSS hashes differ across Chrome, Firefox, and Safari on the same computer due to rendering engines (Blink vs Gecko vs WebKit).
+- **LinkPul Solution**: 
+  The engine implements **Cross-Browser Hardware Clustering (`SAME_HARDWARE_CLUSTER`)**:
+  Combines `Same IP` + `Same OS` + `Same Screen Resolution`.
+  $\rightarrow$ Even if an affiliate switches from Chrome to Firefox/Safari to buy through their own link, the system flags the attempt for **`MANUAL_REVIEW` (+75 pts)** to prevent cross-browser self-referral.

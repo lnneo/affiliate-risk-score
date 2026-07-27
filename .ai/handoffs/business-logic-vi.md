@@ -68,3 +68,38 @@ Hệ thống cộng dồn tổng trọng số điểm rủi ro từ các tín hi
     - **Nghiệp vụ**: Mã khách hàng/đơn hàng (`external_customer_id`) đã từng được ghi nhận tính hoa hồng trước đó. Ngăn chặn gian lận nhận hoa hồng trùng lặp.
 15. **`SUSPICIOUS_GEOLOCATION` (+30 điểm)**:
     - **Nghiệp vụ**: Đơn hàng xuất phát từ các quốc gia thuộc dải rủi ro cao nằm ngoài thị trường mục tiêu (Ví dụ: KP, RU, IR).
+
+---
+
+## PHỤ LỤC A: THƯ VIỆN NHẬN DIỆN VÂN TAY THIẾT BỊ (FINGERPRINT IDENTIFICATION APPENDIX)
+
+### 1. Tổng Quan Về Thư Viện FingerprintJS OSS
+Hệ thống **LinkPul** tích hợp thư viện trích xuất vân tay thiết bị **FingerprintJS (Open-Source Edition)** chạy trực tiếp trên Client-Side Trình duyệt. 
+
+- **Mục Đích**: Định danh duy nhất thiết bị người dùng (Browser Visitor ID) dựa trên phần cứng và môi trường trình duyệt mà **không phụ thuộc vào Cookie** (Cookie-less Tracking). Nhờ đó, ngay cả khi người dùng xóa Cookie, đổi tài khoản hoặc duyệt web ở chế độ Ẩn danh (Incognito Mode), hệ thống vẫn có thể trích xuất mã định danh để phát hiện gian lận.
+
+---
+
+### 2. Các Tính Năng & Tín Hiệu Thu Thập Của Thư Viện (Captured Fingerprint Features)
+
+Thư viện tổng hợp hơn 30 thông số môi trường phần cứng và trình duyệt để tạo ra mã Hash định danh duy nhất:
+
+| Tính Năng / Tín Hiệu | Cơ Chế Thu Thập & Nguyên Lý Hoạt Động | Ứng Dụng Trong Phát Hiện Gian Lận |
+| :--- | :--- | :--- |
+| **1. Canvas Fingerprinting** | Vẽ một hình ảnh/văn bản ẩn trên đối tượng HTML5 Canvas và chuyển thành chuỗi Base64 Data URL. | Mỗi card màn hình GPU, driver đồ họa và font engine trên máy tính sẽ vẽ ra pixel hơi khác nhau, tạo nên mã định danh phần cứng cực kỳ chính xác. |
+| **2. WebGL & GPU Fingerprinting** | Truy vấn thuộc tính WebGL `Unmasked Vendor` và `Unmasked Renderer` (VD: Apple M2, NVIDIA RTX 4070...). | Phát hiện chính xác loại card đồ họa GPU phần cứng và phát hiện các trình giả lập Bot (Headless Chrome/Puppeteer thường không có WebGL renderer thật). |
+| **3. AudioContext Fingerprinting** | Khởi tạo bộ dao động âm thanh (Audio Oscillator) và đo phản ứng độ lệch tần số xử lý bởi soundcard. | Khai thác sự khác biệt nhỏ trong kiến trúc xử lý tín hiệu âm thanh phần cứng trên từng máy tính. |
+| **4. Font Detection (Nhận diện Font)** | Đo đạc chiều rộng/chiều cao hiển thị của danh sách font chuẩn trên Canvas để phát hiện danh sách font được cài đặt trên máy. | Trích xuất bộ Font chữ riêng biệt đã được cài trên hệ điều hành của người dùng. |
+| **5. Screen & Display Metrics** | Thu thập độ phân giải màn hình (`screen.width` x `screen.height`), độ sâu màu (Color Depth), tỷ lệ điểm ảnh màn hình (Device Pixel Ratio - DPR), hướng màn hình. | Phân biệt chính xác các dòng màn hình (VD: Màn hình Retina 2560x1600 vs Full HD 1920x1080). |
+| **6. Môi trường CPU & RAM** | Truy vấn thuộc tính `navigator.hardwareConcurrency` (Số nhân CPU) và `navigator.deviceMemory` (Dung lượng RAM). | Xác định cấu hình phần cứng cốt lõi của máy tính. |
+| **7. Môi trường Trình duyệt & Múi giờ** | Thu thập User-Agent, Múi giờ hệ thống (Timezone), Ngôn ngữ trình duyệt (Language/Locales), Trạng thái Touch Screen. | Phân biệt phiên bản hệ điều hành (macOS, Windows, iOS, Android) và vị trí múi giờ thực tế. |
+
+---
+
+### 3. Cơ Chế Đối Soát Cụm Phần Cứng Đa Trình Duyệt (Cross-Browser Hardware Clustering)
+
+- **Thách Thức Kỹ Thuật**: Do FingerprintJS OSS trích xuất cả thông số của Engine Rendering (Chrome dùng Blink, Firefox dùng Gecko, Safari dùng WebKit), mã Hash Visitor ID trên Chrome và Firefox trên **cùng một máy tính vật lý** sẽ khác nhau.
+- **Giải Pháp Nghiệp Vụ LinkPul**: 
+  Hệ thống xây dựng thuật toán **Cụm Phần Cứng Đa Trình Duyệt (`SAME_HARDWARE_CLUSTER`)**:
+  Combine: `Trùng IP Mạng` + `Trùng Hệ Điều Hành OS` + `Trùng Độ Phân Giải Màn Hình`.
+  $\rightarrow$ Ngay cả khi Affiliate chuyển từ Chrome sang Firefox/Safari để tự giới thiệu mua hàng, hệ thống vẫn gắn cờ cảnh báo **`MANUAL_REVIEW` (+75 điểm)** để chặn gian lận triệt để!
