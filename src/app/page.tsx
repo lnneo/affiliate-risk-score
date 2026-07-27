@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
+import { useI18n } from '@/i18n/I18nProvider';
 import {
   DECISION_STATES,
   findScenarioById,
@@ -60,6 +61,7 @@ const DECISION_TAB_CLASS: Record<SimulatorDecision, string> = {
 };
 
 export default function SimulatorPage() {
+  const { t } = useI18n();
   const initialScenario = SIMULATOR_SCENARIOS[0];
   const [selectedDecision, setSelectedDecision] = useState<SimulatorDecision>(initialScenario.decision);
   const [selectedRuleFilter, setSelectedRuleFilter] = useState<string>('ALL');
@@ -207,13 +209,13 @@ export default function SimulatorPage() {
         <div className="space-y-3 min-w-0">
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-xs font-semibold text-indigo-400">
             <Flame className="h-3.5 w-3.5 text-amber-400 shrink-0" />
-            100% Tapfiliate Enterprise Fraud Prevention Specs
+            {t.simulator.eyebrow}
           </div>
           <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl break-words">
-            Affiliate Fraud & Risk Score Engine
+            {t.simulator.title}
           </h1>
           <p className="text-slate-400 max-w-3xl text-sm leading-relaxed break-words">
-            Hệ thống 15 thuật toán phát hiện gian lận đa tín hiệu: Vân tay thiết bị, IP Blacklist, Referral Cloaking, Tự giới thiệu, Trùng mã chuyển đổi, Velocity & Geolocation Anomaly.
+            {t.simulator.description}
           </p>
         </div>
 
@@ -221,8 +223,8 @@ export default function SimulatorPage() {
         <div className="glass-card rounded-2xl border border-slate-800 p-4 sm:p-5 space-y-4 min-w-0">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
             <div className="min-w-0">
-              <h2 className="text-sm font-bold text-slate-200">Giả lập theo trạng thái</h2>
-              <p className="text-[11px] text-slate-500 mt-0.5">Chọn trạng thái, lọc rule, rồi chọn kịch bản mẫu.</p>
+              <h2 className="text-sm font-bold text-slate-200">{t.simulator.stateTitle}</h2>
+              <p className="text-[11px] text-slate-500 mt-0.5">{t.simulator.stateHint}</p>
             </div>
             <div className="flex flex-wrap gap-2">
               {DECISION_STATES.map((state) => {
@@ -248,7 +250,7 @@ export default function SimulatorPage() {
 
           {ruleFilters.length > 0 ? (
             <div className="flex flex-wrap items-center gap-2 border-t border-slate-800/80 pt-3">
-              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 shrink-0">Rule:</span>
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-500 shrink-0">{t.simulator.ruleLabel}</span>
               <button
                 type="button"
                 onClick={() => handleRuleFilterChange('ALL')}
@@ -258,7 +260,7 @@ export default function SimulatorPage() {
                     : 'bg-slate-950 text-slate-400 border-slate-800 hover:border-slate-700'
                 }`}
               >
-                Tất cả
+                {t.simulator.allRules}
               </button>
               {ruleFilters.map((rule) => (
                 <button
@@ -348,7 +350,7 @@ export default function SimulatorPage() {
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h2 className="font-bold text-slate-200 text-base flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-indigo-400 shrink-0" />
-                  Thông tin Đơn hàng & Người mua
+                  {t.simulator.orderTitle}
                 </h2>
                 <button
                   onClick={() => {
@@ -359,7 +361,7 @@ export default function SimulatorPage() {
                   }}
                   className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1 shrink-0 font-medium"
                 >
-                  <RefreshCw className="h-3 w-3" /> Đặt lại
+                  <RefreshCw className="h-3 w-3" /> {t.common.reset}
                 </button>
               </div>
 
@@ -520,12 +522,12 @@ export default function SimulatorPage() {
               <LoadingButton
                 onClick={runSimulation}
                 loading={loading}
-                loadingText="Đang đối soát..."
+                loadingText={t.simulator.evaluating}
                 icon={<Play className="h-5 w-5 fill-current shrink-0" />}
                 spinnerClassName="h-5 w-5"
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 font-bold text-white shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                Đánh giá
+                {t.simulator.evaluate}
               </LoadingButton>
             </div>
           </div>
@@ -538,8 +540,8 @@ export default function SimulatorPage() {
             >
               {loading ? (
                 <PanelLoadingState
-                  title="Đang đối soát Risk Engine..."
-                  description="Hệ thống đang ghi nhận lượt click, đối soát 15 thuật toán Tapfiliate và tính điểm rủi ro cho kịch bản này."
+                  title={t.simulator.loadingTitle}
+                  description={t.simulator.loadingBody}
                 />
               ) : evaluationResult ? (
               <div className="p-6 space-y-6 animate-fade-in min-w-0 flex-1">
@@ -643,9 +645,9 @@ export default function SimulatorPage() {
                   <div className="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                     <ShieldCheck className="h-8 w-8" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đánh giá Kịch bản (100% Tapfiliate Rules)</h3>
+                  <h3 className="text-lg font-bold text-slate-200">{t.simulator.readyTitle}</h3>
                   <p className="text-xs text-slate-400 max-w-md">
-                    Bấm nút &ldquo;Đánh giá&rdquo; để đối soát tất cả 15 thuật toán phòng chống gian lận.
+                    {t.simulator.readyBody}
                   </p>
                 </div>
               )}

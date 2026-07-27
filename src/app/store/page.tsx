@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
 import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
+import { useI18n } from '@/i18n/I18nProvider';
 import { useSearchParams } from 'next/navigation';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { 
@@ -21,6 +22,7 @@ import {
 } from 'lucide-react';
 
 function StoreCheckoutContent() {
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   
   const [affiliateId, setAffiliateId] = useState('aff_john_doe');
@@ -137,13 +139,13 @@ function StoreCheckoutContent() {
       <div className="space-y-3 min-w-0">
         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-xs font-semibold text-emerald-400">
           <ShoppingBag className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-          Cửa hàng Mua hàng Thật (Real Checkout Demo)
+          {t.store.eyebrow}
         </div>
         <h1 className="text-3xl font-extrabold tracking-tight text-white sm:text-4xl break-words">
-          Cửa hàng Sản phẩm Pro Plan ($99.00)
+          {t.store.title}
         </h1>
         <p className="text-slate-400 max-w-3xl text-sm leading-relaxed break-words">
-          Đơn hàng này được giới thiệu bởi Affiliate <span className="font-mono text-indigo-400 font-bold break-all">{affiliateId}</span>. Hệ thống tự động thu thập Fingerprint thực tế từ trình duyệt của bạn để tính điểm rủi ro.
+          {t.store.descriptionPrefix} <span className="font-mono text-indigo-400 font-bold break-all">{affiliateId}</span>.
         </p>
       </div>
 
@@ -157,7 +159,7 @@ function StoreCheckoutContent() {
             <div className="border-b border-slate-800 pb-4">
               <h2 className="font-bold text-slate-200 text-base flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-indigo-400 shrink-0" />
-                Thông tin Đặt hàng Thực tế
+                {t.store.checkoutTitle}
               </h2>
             </div>
 
@@ -217,13 +219,13 @@ function StoreCheckoutContent() {
             <LoadingButton
               onClick={handleCheckout}
               loading={evaluating}
-              loadingText="Đang thanh toán..."
+              loadingText={t.store.paying}
               icon={<ShoppingBag className="h-5 w-5 shrink-0" />}
               spinnerClassName="h-5 w-5"
               disabled={loadingFp}
               className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-indigo-600 to-purple-600 font-bold text-white shadow-lg shadow-emerald-600/30 hover:opacity-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
             >
-              Thanh toán
+              {t.store.pay}
             </LoadingButton>
           </div>
         </div>
@@ -236,8 +238,8 @@ function StoreCheckoutContent() {
           >
             {evaluating ? (
               <PanelLoadingState
-                title="Đang xử lý thanh toán..."
-                description="Risk Engine đang đánh giá giao dịch và ghi nhận kết quả vào CSDL Admin Audit Ledger."
+                title={t.store.loadingTitle}
+                description={t.store.loadingBody}
               />
             ) : evaluationResult ? (
             <div className="p-6 space-y-6 animate-fade-in min-w-0 flex-1">
@@ -306,9 +308,9 @@ function StoreCheckoutContent() {
                 <div className="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
                   <ShieldCheck className="h-8 w-8" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đặt hàng & Đánh giá</h3>
+                <h3 className="text-lg font-bold text-slate-200">{t.store.readyTitle}</h3>
                 <p className="text-xs text-slate-400 max-w-md">
-                  Bấm nút &ldquo;Thanh toán&rdquo; để mô phỏng một giao dịch thực tế. Kết quả đánh giá Risk Engine sẽ xuất hiện tại đây và được lưu vào CSDL Admin Audit Ledger.
+                  {t.store.readyBody}
                 </p>
               </div>
             )}
