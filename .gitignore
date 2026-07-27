@@ -20,6 +20,10 @@
 # production
 /build
 
+# sqlite data & archives
+data/*.db*
+*.zip
+
 # misc
 .DS_Store
 *.pem
