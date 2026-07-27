@@ -31,6 +31,17 @@ TURSO_DATABASE_URL=libsql://your-database.turso.io
 TURSO_AUTH_TOKEN=your-turso-auth-token
 ```
 
+Copy both values from Turso:
+
+```bash
+turso db show <database-name>   # Database URL
+turso db tokens create <database-name>
+```
+
+On Vercel, add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to the **Production** environment so the deployed app can connect.
+
+For GitHub Actions bootstrap, also add the same two values as repository secrets named `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. This is required because Vercel **Sensitive** environment variables cannot be exported by `vercel pull`, so the CI bootstrap step cannot read Turso credentials from the pulled Vercel env file alone.
+
 Bootstrap the Turso schema and default seed data with:
 
 ```bash

@@ -15,11 +15,13 @@ async function executeStatement(
 }
 
 async function main() {
-  const { url, authToken } = getTursoConfig({ loadVercelEnvFile: true });
+  const { url, authToken, source } = getTursoConfig({ loadVercelEnvFile: true });
   const client = createClient({ url, authToken });
 
   try {
-    console.log('Bootstrapping Turso schema and seed data...');
+    console.log(
+      `Bootstrapping Turso schema and seed data (url source: ${source.url}, token source: ${source.authToken})...`,
+    );
 
     for (const statement of schemaStatements) {
       await executeStatement(client, statement.sql, statement.args);
