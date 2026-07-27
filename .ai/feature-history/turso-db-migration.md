@@ -33,6 +33,12 @@ Migrate production database access to Turso-compatible libSQL while preserving l
      - `scripts/bootstrap-turso.ts`
      - `README.md`
 
+2. **Commit Hash**: `dca02d3`
+   - **Summary**: `ci: bootstrap Turso schema before production Vercel build`
+   - **Purpose**: update the deploy workflow so production Vercel builds bootstrap the Turso schema and seed data automatically after `vercel pull`, before `vercel build --prod`.
+   - **Files Changed**:
+     - `.github/workflows/deploy-vercel.yml`
+
 ---
 
 ## Verification Performed
@@ -40,21 +46,23 @@ Migrate production database access to Turso-compatible libSQL while preserving l
 - `pnpm test`: Passed
 - `pnpm run build`: Passed
 - `pnpm exec eslint ...`: attempted on changed backend files, but repo still has existing `no-explicit-any` lint debt in API route files outside the migration-specific behavior changes.
+- Workflow update verification: reviewed the generated YAML diff to confirm `pnpm db:turso:bootstrap` runs after `vercel pull` and before `vercel build --prod`.
 
 ---
 
 ## Dependencies Between Commits
 
 - `e35d281` has no dependency on additional local commits in this branch.
+- `dca02d3` depends on `e35d281`, because the workflow calls `pnpm db:turso:bootstrap` introduced by that implementation commit.
 
 ---
 
 ## Cherry-Pick Notes
 
-- Cherry-pick order: `e35d281`
+- Cherry-pick order: `e35d281`, then `dca02d3`
 - Required production environment variables: `TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`
 - Optional override: `LOCAL_DB=1` forces the app to stay on local SQLite
-- Run `pnpm db:turso:bootstrap` before first production use against a new Turso database
+- Production deploy workflow now runs `pnpm db:turso:bootstrap` automatically after `vercel pull`
 
 ---
 
