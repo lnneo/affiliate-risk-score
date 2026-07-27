@@ -1,18 +1,35 @@
 import Database from 'better-sqlite3';
 import path from 'path';
 import fs from 'fs';
+import os from 'os';
 
-const dbPath = path.join(process.cwd(), 'data', 'affiliate_fraud.db');
-const dataDir = path.join(process.cwd(), 'data');
+// Detect Vercel / AWS Lambda / Serverless environment where process.cwd() is read-only (/var/task)
+const isServerless = Boolean(process.env.VERCEL) || (process.env.NODE_ENV === 'production' && !process.env.LOCAL_DB);
+
+// Use /tmp directory on Vercel/serverless environments, otherwise local ./data
+const dataDir = isServerless ? path.join(os.tmpdir(), 'linkpul_data') : path.join(process.cwd(), 'data');
+const dbPath = path.join(dataDir, 'affiliate_fraud.db');
 
 if (!fs.existsSync(dataDir)) {
-  fs.mkdirSync(dataDir, { recursive: true });
+  try {
+    fs.mkdirSync(dataDir, { recursive: true });
+  } catch (err) {
+    console.warn('Warning: Could not create data directory:', err);
+  }
 }
 
 export const db = new Database(dbPath);
 
-// Enable WAL mode for performance
-db.pragma('journal_mode = WAL');
+// Enable WAL mode locally, or fallback to DELETE in serverless envs
+try {
+  if (isServerless) {
+    db.pragma('journal_mode = DELETE');
+  } else {
+    db.pragma('journal_mode = WAL');
+  }
+} catch (err) {
+  console.warn('Warning: Could not set journal mode:', err);
+}
 
 export function initDatabase() {
   db.exec(`
