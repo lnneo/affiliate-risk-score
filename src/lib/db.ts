@@ -148,21 +148,15 @@ export function initDatabase() {
     console.error('Migration error:', err);
   }
 
-  // Insert default affiliate profile for aff_john_doe if not exists
-  const affProfile = db.prepare('SELECT affiliate_id FROM affiliate_profiles WHERE affiliate_id = ?').get('aff_john_doe');
-  if (!affProfile) {
-    db.prepare(`
-      INSERT INTO affiliate_profiles (affiliate_id, name, email, payment_account, registered_ip, registered_fingerprint_hash)
-      VALUES ('aff_john_doe', 'John Doe (Affiliate)', 'john_doe@affiliate.com', 'paypal_john_doe@affiliate.com', '118.69.182.10', 'fp_john_macbook_m2')
-    `).run();
-  }
+  // Insert default affiliate profile for aff_john_doe (idempotent; safe for concurrent init)
+  db.prepare(`
+    INSERT OR IGNORE INTO affiliate_profiles (affiliate_id, name, email, payment_account, registered_ip, registered_fingerprint_hash)
+    VALUES ('aff_john_doe', 'John Doe (Affiliate)', 'john_doe@affiliate.com', 'paypal_john_doe@affiliate.com', '118.69.182.10', 'fp_john_macbook_m2')
+  `).run();
 
-  // Insert default blacklisted values for demo
-  const blacklistCount = db.prepare('SELECT COUNT(*) as count FROM blacklisted_attributes').get() as { count: number };
-  if (blacklistCount.count === 0) {
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_1', 'IP', '198.51.100.99', 'Known Click Farm Node')`).run();
-    db.prepare(`INSERT INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_2', 'DOMAIN', 'spam-ad-network.biz', 'Referral Spam Network')`).run();
-  }
+  // Insert default blacklisted values for demo (idempotent; safe for concurrent init)
+  db.prepare(`INSERT OR IGNORE INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_1', 'IP', '198.51.100.99', 'Known Click Farm Node')`).run();
+  db.prepare(`INSERT OR IGNORE INTO blacklisted_attributes (id, type, value, reason) VALUES ('bl_2', 'DOMAIN', 'spam-ad-network.biz', 'Referral Spam Network')`).run();
 
   // Ensure default rules cover 100% Tapfiliate feature set
   const defaultRules = [
