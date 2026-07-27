@@ -154,7 +154,7 @@ function normalizeTursoDatabaseUrl(rawUrl: string): string {
       'TURSO_DATABASE_URL is not a valid Turso database URL.',
       `Received a ${normalized.length}-character value without libsql://, https://, or a .turso.io host.`,
       'From Turso, copy the Database URL from `turso db show <database-name>` (example: libsql://my-db-myorg.turso.io).',
-      'If the variable is marked Sensitive on Vercel, `vercel pull` cannot read it in GitHub Actions. Add TURSO_DATABASE_URL and TURSO_AUTH_TOKEN as GitHub repository secrets for CI bootstrap.',
+      'If the variable is marked Sensitive on Vercel, `vercel pull` cannot export it for CI bootstrap. Re-create it as a non-sensitive Production variable or provide it via process environment.',
     ].join(' '),
   );
 }
@@ -179,8 +179,8 @@ export function getTursoConfig(options?: {
     throw new Error(
       [
         'Missing TURSO_DATABASE_URL.',
-        'Set it in GitHub Actions secrets for CI bootstrap, or in .vercel/.env.production.local after `vercel pull` for local bootstrap.',
-        'Vercel Sensitive environment variables cannot be exported by `vercel pull`, so CI must use GitHub secrets even if the values are already configured on Vercel.',
+        'Set it on Vercel Production or in .vercel/.env.production.local after `vercel pull`.',
+        'Vercel Sensitive environment variables are not exported by `vercel pull`, so CI bootstrap needs non-sensitive Production values.',
       ].join(' '),
     );
   }
@@ -194,8 +194,8 @@ export function getTursoConfig(options?: {
     throw new Error(
       [
         'Missing TURSO_AUTH_TOKEN.',
-        'Set it in GitHub Actions secrets for CI bootstrap, or in .vercel/.env.production.local after `vercel pull` for local bootstrap.',
-        'Vercel Sensitive environment variables cannot be exported by `vercel pull`, so CI must use GitHub secrets even if the values are already configured on Vercel.',
+        'Set it on Vercel Production or in .vercel/.env.production.local after `vercel pull`.',
+        'Vercel Sensitive environment variables are not exported by `vercel pull`, so CI bootstrap needs non-sensitive Production values.',
       ].join(' '),
     );
   }

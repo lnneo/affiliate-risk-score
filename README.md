@@ -40,7 +40,7 @@ turso db tokens create <database-name>
 
 On Vercel, add `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` to the **Production** environment so the deployed app can connect.
 
-For GitHub Actions bootstrap, also add the same two values as repository secrets named `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN`. This is required because Vercel **Sensitive** environment variables cannot be exported by `vercel pull`, so the CI bootstrap step cannot read Turso credentials from the pulled Vercel env file alone.
+For CI bootstrap via `vercel pull`, keep both variables **non-sensitive** on Vercel. Sensitive environment variables are not exported into `.vercel/.env.production.local`, so the bootstrap step cannot read them in GitHub Actions.
 
 Bootstrap the Turso schema and default seed data with:
 

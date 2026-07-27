@@ -12,7 +12,7 @@ Fix CI Turso bootstrap failing after Vercel env normalization because sensitive 
 
 1. **Commit Hash**: `2cadc0c`
    - **Summary**: `fix: load Turso credentials from GitHub secrets for CI bootstrap`
-   - **Purpose**: pass `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` from GitHub Actions secrets, improve Turso env resolution/error messages, and document that Vercel Sensitive vars cannot be pulled into CI.
+   - **Purpose**: improve Turso env resolution/error messages and document that Vercel Sensitive vars cannot be pulled into CI; bootstrap reads credentials from `.vercel/.env.production.local` after `vercel pull`.
    - **Files Changed**: `src/lib/turso-config.ts`, `scripts/bootstrap-turso.ts`, `.github/workflows/deploy-vercel.yml`, `src/lib/__tests__/turso-config.test.ts`, `README.md`
 
 ---
