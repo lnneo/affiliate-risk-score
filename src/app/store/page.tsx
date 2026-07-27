@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import PanelLoadingState from '@/components/PanelLoadingState';
+import { useSyncedPanelMinHeight } from '@/hooks/useSyncedPanelMinHeight';
 import { useSearchParams } from 'next/navigation';
 import FingerprintJS from '@fingerprintjs/fingerprintjs';
 import { 
@@ -31,6 +32,7 @@ function StoreCheckoutContent() {
   const [loadingFp, setLoadingFp] = useState(true);
   const [evaluating, setEvaluating] = useState(false);
   const [evaluationResult, setEvaluationResult] = useState<any>(null);
+  const { sourceRef: orderPanelRef, minHeight: orderPanelMinHeight } = useSyncedPanelMinHeight<HTMLDivElement>();
 
   useEffect(() => {
     async function initClientData() {
@@ -145,10 +147,13 @@ function StoreCheckoutContent() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:items-stretch min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:items-start min-w-0">
         {/* Left Form */}
-        <div className="lg:col-span-5 flex min-w-0">
-          <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-5 min-w-0 flex-1 flex flex-col">
+        <div className="lg:col-span-5 min-w-0">
+          <div
+            ref={orderPanelRef}
+            className="glass-card p-6 rounded-2xl border border-slate-800 space-y-5 min-w-0"
+          >
             <div className="border-b border-slate-800 pb-4">
               <h2 className="font-bold text-slate-200 text-base flex items-center gap-2">
                 <CreditCard className="h-5 w-5 text-indigo-400 shrink-0" />
@@ -224,8 +229,11 @@ function StoreCheckoutContent() {
         </div>
 
         {/* Right Output */}
-        <div className="lg:col-span-7 flex min-w-0">
-          <div className="glass-card rounded-2xl border border-slate-800 min-w-0 flex-1 flex flex-col">
+        <div className="lg:col-span-7 min-w-0">
+          <div
+            className="glass-card rounded-2xl border border-slate-800 min-w-0 flex flex-col"
+            style={orderPanelMinHeight ? { minHeight: `${orderPanelMinHeight}px` } : undefined}
+          >
             {evaluating ? (
               <PanelLoadingState
                 title="Đang xử lý thanh toán..."
