@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Navbar from '@/components/Navbar';
+import LoadingButton from '@/components/LoadingButton';
+import PanelLoadingState from '@/components/PanelLoadingState';
 import { 
   ShieldCheck, 
   AlertTriangle, 
@@ -327,10 +329,10 @@ export default function SimulatorPage() {
         </div>
 
         {/* Main Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 min-w-0">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:items-stretch min-w-0">
           {/* Left Form */}
-          <div className="lg:col-span-5 space-y-6 min-w-0">
-            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-5 min-w-0">
+          <div className="lg:col-span-5 flex min-w-0">
+            <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-5 min-w-0 flex-1 flex flex-col">
               <div className="flex items-center justify-between border-b border-slate-800 pb-4">
                 <h2 className="font-bold text-slate-200 text-base flex items-center gap-2">
                   <ShoppingCart className="h-5 w-5 text-indigo-400 shrink-0" />
@@ -498,41 +500,29 @@ export default function SimulatorPage() {
                 </div>
               </div>
 
-              {/* Submit Button */}
-              <button
+              <LoadingButton
                 onClick={runSimulation}
-                disabled={loading}
+                loading={loading}
+                loadingText="Đang đối soát..."
+                icon={<Play className="h-5 w-5 fill-current shrink-0" />}
+                spinnerClassName="h-5 w-5"
                 className="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-indigo-600 via-indigo-500 to-purple-600 font-bold text-white shadow-lg shadow-indigo-600/30 hover:shadow-indigo-600/50 hover:opacity-95 active:scale-[0.99] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                {loading ? (
-                  <>
-                    <RefreshCw className="h-5 w-5 animate-spin" /> Đang đối soát...
-                  </>
-                ) : (
-                  <>
-                    <Play className="h-5 w-5 fill-current" /> Đánh giá
-                  </>
-                )}
-              </button>
+                Đánh giá
+              </LoadingButton>
             </div>
           </div>
 
           {/* Right Column */}
-          <div className="lg:col-span-7 space-y-6 min-w-0">
-            {!evaluationResult && !loading && (
-              <div className="glass-card p-12 rounded-2xl border border-slate-800/80 text-center flex flex-col items-center justify-center space-y-4 min-h-[400px]">
-                <div className="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
-                  <ShieldCheck className="h-8 w-8" />
-                </div>
-                <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đánh giá Kịch bản (100% Tapfiliate Rules)</h3>
-                <p className="text-xs text-slate-400 max-w-md">
-                  Bấm nút &ldquo;Đánh giá&rdquo; để đối soát tất cả 15 thuật toán phòng chống gian lận.
-                </p>
-              </div>
-            )}
-
-            {evaluationResult && (
-              <div className="glass-card p-6 rounded-2xl border border-slate-800 space-y-6 animate-fade-in min-w-0">
+          <div className="lg:col-span-7 flex min-w-0">
+            <div className="glass-card rounded-2xl border border-slate-800 min-w-0 flex-1 flex flex-col">
+              {loading ? (
+                <PanelLoadingState
+                  title="Đang đối soát Risk Engine..."
+                  description="Hệ thống đang ghi nhận lượt click, đối soát 15 thuật toán Tapfiliate và tính điểm rủi ro cho kịch bản này."
+                />
+              ) : evaluationResult ? (
+              <div className="p-6 space-y-6 animate-fade-in min-w-0 flex-1">
                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-slate-800 pb-5 min-w-0">
                   <div className="space-y-1 min-w-0 max-w-full">
                     <span className="text-xs text-slate-400 uppercase font-semibold tracking-wider block">Kết quả Đối soát Risk Engine</span>
@@ -628,7 +618,18 @@ export default function SimulatorPage() {
                   </div>
                 </div>
               </div>
-            )}
+              ) : (
+                <div className="flex flex-1 flex-col items-center justify-center space-y-4 text-center px-6 py-12">
+                  <div className="h-16 w-16 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400">
+                    <ShieldCheck className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-200">Sẵn sàng Đánh giá Kịch bản (100% Tapfiliate Rules)</h3>
+                  <p className="text-xs text-slate-400 max-w-md">
+                    Bấm nút &ldquo;Đánh giá&rdquo; để đối soát tất cả 15 thuật toán phòng chống gian lận.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>

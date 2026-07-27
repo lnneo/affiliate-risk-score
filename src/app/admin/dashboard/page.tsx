@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import LoadingButton from '@/components/LoadingButton';
 import { 
   Filter, 
   RefreshCw, 
@@ -26,6 +27,7 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
   const [filterDecision, setFilterDecision] = useState('ALL');
   const [selectedRecord, setSelectedRecord] = useState<any>(null);
+  const [reviewingAction, setReviewingAction] = useState<{ riskScoreId: string; status: 'APPROVED' | 'REJECTED' } | null>(null);
 
   const fetchRiskScores = async () => {
     setLoading(true);
@@ -48,6 +50,7 @@ export default function AdminDashboardPage() {
   }, [filterDecision]);
 
   const handleReviewAction = async (riskScoreId: string, status: 'APPROVED' | 'REJECTED') => {
+    setReviewingAction({ riskScoreId, status });
     try {
       const res = await fetch('/api/admin/risk-scores', {
         method: 'PATCH',
@@ -63,6 +66,8 @@ export default function AdminDashboardPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setReviewingAction(null);
     }
   };
 
@@ -92,10 +97,11 @@ export default function AdminDashboardPage() {
 
           <button
             onClick={fetchRiskScores}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0"
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0 disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Làm mới
+            {loading ? 'Đang tải...' : 'Làm mới'}
           </button>
         </div>
 
@@ -316,18 +322,26 @@ export default function AdminDashboardPage() {
                 <div className="pt-3 border-t border-slate-800 space-y-3 min-w-0 shrink-0">
                   <span className="font-bold text-slate-300 block">Thao tác Ghi đè Quyết định (Manual Override):</span>
                   <div className="flex flex-col sm:flex-row items-center gap-3">
-                    <button
+                    <LoadingButton
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'APPROVED')}
-                      className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                      loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'APPROVED'}
+                      loadingText="Đang duyệt..."
+                      icon={<ThumbsUp className="h-3.5 w-3.5 shrink-0" />}
+                      disabled={Boolean(reviewingAction)}
+                      className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
-                      <ThumbsUp className="h-3.5 w-3.5 shrink-0" /> Duyệt
-                    </button>
-                    <button
+                      Duyệt
+                    </LoadingButton>
+                    <LoadingButton
                       onClick={() => handleReviewAction(selectedRecord.risk_score_id, 'REJECTED')}
-                      className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5"
+                      loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'REJECTED'}
+                      loadingText="Đang từ chối..."
+                      icon={<ThumbsDown className="h-3.5 w-3.5 shrink-0" />}
+                      disabled={Boolean(reviewingAction)}
+                      className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
-                      <ThumbsDown className="h-3.5 w-3.5 shrink-0" /> Từ chối
-                    </button>
+                      Từ chối
+                    </LoadingButton>
                   </div>
                 </div>
               </div>

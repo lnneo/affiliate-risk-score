@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
+import LoadingButton from '@/components/LoadingButton';
 import { Sliders, RefreshCw, Power, Ban, Plus, Trash2 } from 'lucide-react';
 
 export default function AdminConfigPage() {
@@ -15,6 +16,7 @@ export default function AdminConfigPage() {
   const [newValue, setNewValue] = useState('');
   const [newReason, setNewReason] = useState('');
   const [addingBlacklist, setAddingBlacklist] = useState(false);
+  const [deletingBlacklistId, setDeletingBlacklistId] = useState<string | null>(null);
 
   const fetchRulesAndBlacklist = async () => {
     setLoading(true);
@@ -85,6 +87,7 @@ export default function AdminConfigPage() {
   };
 
   const handleDeleteBlacklist = async (id: string) => {
+    setDeletingBlacklistId(id);
     try {
       const res = await fetch(`/api/admin/blacklist?id=${id}`, { method: 'DELETE' });
       const json = await res.json();
@@ -93,6 +96,8 @@ export default function AdminConfigPage() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setDeletingBlacklistId(null);
     }
   };
 
@@ -115,10 +120,11 @@ export default function AdminConfigPage() {
 
           <button
             onClick={fetchRulesAndBlacklist}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0"
+            disabled={loading}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 border border-slate-800 text-xs font-medium text-slate-300 hover:bg-slate-800 shrink-0 disabled:opacity-50"
           >
             <RefreshCw className={`h-3.5 w-3.5 ${loading ? 'animate-spin' : ''}`} />
-            Làm mới
+            {loading ? 'Đang tải...' : 'Làm mới'}
           </button>
         </div>
 
@@ -181,13 +187,16 @@ export default function AdminConfigPage() {
               onChange={(e) => setNewReason(e.target.value)}
               className="bg-slate-950/80 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 font-mono focus:border-indigo-500 focus:outline-none break-words"
             />
-            <button
+            <LoadingButton
               onClick={handleAddBlacklist}
-              disabled={addingBlacklist || !newValue.trim()}
+              loading={addingBlacklist}
+              loadingText="Đang thêm..."
+              icon={<Plus className="h-4 w-4 shrink-0" />}
+              disabled={!newValue.trim()}
               className="py-2 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 shadow-lg shadow-rose-600/30 transition-all disabled:opacity-50 shrink-0"
             >
-              <Plus className="h-4 w-4 shrink-0" /> Thêm
-            </button>
+              Thêm
+            </LoadingButton>
           </div>
 
           {/* Blacklist Table */}
@@ -217,12 +226,16 @@ export default function AdminConfigPage() {
                       <td className="px-3 py-2 font-bold text-slate-200 break-all max-w-[200px]">{item.value}</td>
                       <td className="px-3 py-2 text-slate-400 font-sans text-xs break-words max-w-[250px]">{item.reason || 'N/A'}</td>
                       <td className="px-3 py-2 text-right whitespace-nowrap">
-                        <button
+                        <LoadingButton
                           onClick={() => handleDeleteBlacklist(item.id)}
-                          className="text-rose-400 hover:text-rose-300 p-1 font-medium"
+                          loading={deletingBlacklistId === item.id}
+                          loadingText="Đang xóa..."
+                          icon={<Trash2 className="h-3.5 w-3.5 shrink-0" />}
+                          disabled={Boolean(deletingBlacklistId)}
+                          className="text-rose-400 hover:text-rose-300 p-1 font-medium flex items-center justify-end gap-1 ml-auto disabled:opacity-50"
                         >
-                          <Trash2 className="h-3.5 w-3.5 inline mr-1" /> Xóa
-                        </button>
+                          Xóa
+                        </LoadingButton>
                       </td>
                     </tr>
                   ))
@@ -249,17 +262,20 @@ export default function AdminConfigPage() {
                     <span className="font-bold text-sm text-slate-100 font-mono truncate">{rule.rule_type}</span>
                   </div>
 
-                  <button
+                  <LoadingButton
                     onClick={() => handleUpdateRule(rule.rule_type, rule.score_weight, !isEnabled)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all shrink-0 ${
+                    loading={savingRule === rule.rule_type}
+                    loadingText={isEnabled ? 'Đang tắt...' : 'Đang bật...'}
+                    icon={<Power className="h-3 w-3 shrink-0" />}
+                    disabled={Boolean(savingRule)}
+                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all shrink-0 disabled:opacity-50 ${
                       isEnabled
                         ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'
                         : 'bg-slate-800 text-slate-500 border-slate-700'
                     }`}
                   >
-                    <Power className="h-3 w-3 shrink-0" />
                     {isEnabled ? 'Bật' : 'Tắt'}
-                  </button>
+                  </LoadingButton>
                 </div>
 
                 <p className="text-xs text-slate-400 mb-4 min-h-[32px] leading-relaxed break-words">{rule.description}</p>
