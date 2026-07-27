@@ -6,9 +6,9 @@
 - **Repository Remote**: `https://github.com/lnneo/affiliate-risk-score.git`
 - **Branches**:
   - `main`: Base initial commit (`a4bb835`)
-  - `develop`: Integration branch (`a4bb835`)
-  - `feature/linkpul-affiliate-risk-score`: Active feature branch (`8fa2302`)
-- **Vercel CI/CD Automation**: Automated GitHub Actions workflow `.github/workflows/deploy-vercel.yml` triggering auto-tests & Vercel deployment upon merge into `develop`.
+  - `develop`: Integration branch (`c458f3a`)
+  - `feature/ci-vercel-workflow`: Active Vercel CI/CD branch
+- **Vercel CI/CD Automation**: Robust GitHub Actions workflow `.github/workflows/deploy-vercel.yml` using `amondnet/vercel-action@v25` for auto-testing & Vercel deployment upon merge into `develop`.
 - **Vercel Deployment Compatibility**: Configured `serverExternalPackages: ['better-sqlite3']` in `next.config.ts` and dynamic writable database location (`os.tmpdir()`) in `src/lib/db.ts` to prevent `/var/task` read-only `ENOENT` / `EROFS` errors on Vercel Serverless Functions.
 - **Business Logic Specification (English)**: Reference [.ai/handoffs/business-logic.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic.md)
 - **Business Logic Specification (Vietnamese)**: Reference [.ai/handoffs/business-logic-vi.md](file:///Users/longnd/Projects/AdPulHQ/affiliate-risk-score/.ai/handoffs/business-logic-vi.md)
@@ -36,7 +36,7 @@ Key tables in `src/lib/db.ts`:
 
 | File Path | Technical Description |
 | :--- | :--- |
-| `.github/workflows/deploy-vercel.yml` | GitHub Actions workflow automatically running unit tests and deploying artifacts to Vercel upon push to `develop`. |
+| `.github/workflows/deploy-vercel.yml` | GitHub Actions workflow using `amondnet/vercel-action@v25` to automatically run unit tests and deploy artifacts to Vercel upon push to `develop`. |
 | `src/lib/db.ts` | SQLite DB connection (SQLite v3.53.3 via `better-sqlite3`), automatic `/tmp` path selection for Vercel Serverless runtime, table schemas, migrations, and initial seed defaults. |
 | `next.config.ts` | Next.js configuration declaring `serverExternalPackages: ['better-sqlite3']` for Vercel C++ native module compilation. |
 | `src/lib/fraud/types.ts` | Data types (`OrderContext`, `FraudSignal`, `RiskDecision`, `RiskEvaluationResult`). |
@@ -66,7 +66,7 @@ Key tables in `src/lib/db.ts`:
   - Command: `pnpm build`
   - Result: Compiled successfully with Next.js Turbopack.
 - **Vercel GitHub Workflow**:
-  - Verified syntax of `.github/workflows/deploy-vercel.yml`.
+  - Updated to `amondnet/vercel-action@v25`.
 
 ---
 
@@ -76,4 +76,4 @@ Key tables in `src/lib/db.ts`:
 2. **Development Server**: Run `pnpm dev` to start dev server on `http://localhost:3000`.
 3. **Node Engine Requirement**: Use Node.js `>= 22.0.0` (as defined in `.nvmrc` and `package.json`).
 4. **Database Reset**: Call `POST http://localhost:3000/api/demo/seed` to re-seed initial test data if needed.
-5. **Git Workflow**: Push feature commits to `origin/feature/linkpul-affiliate-risk-score` and create PR to `origin/develop`.
+5. **Git Workflow**: Push feature commits to `origin/feature/ci-vercel-workflow` and create PR to `origin/develop`.
