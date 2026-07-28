@@ -339,7 +339,7 @@ export default function AdminDashboardPage() {
                       loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'APPROVED'}
                       loadingText={t.dashboard.approvingBtn}
                       icon={<ThumbsUp className="h-3.5 w-3.5 shrink-0" />}
-                      disabled={Boolean(reviewingAction)}
+                      disabled={Boolean(reviewingAction) || selectedRecord.review_status === 'APPROVED'}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
                       {t.dashboard.approveBtn}
@@ -349,7 +349,7 @@ export default function AdminDashboardPage() {
                       loading={reviewingAction?.riskScoreId === selectedRecord.risk_score_id && reviewingAction?.status === 'REJECTED'}
                       loadingText={t.dashboard.rejectingBtn}
                       icon={<ThumbsDown className="h-3.5 w-3.5 shrink-0" />}
-                      disabled={Boolean(reviewingAction)}
+                      disabled={Boolean(reviewingAction) || selectedRecord.review_status === 'REJECTED'}
                       className="w-full sm:flex-1 py-2 rounded-lg bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs flex items-center justify-center gap-1.5 disabled:opacity-50"
                     >
                       {t.dashboard.rejectBtn}
