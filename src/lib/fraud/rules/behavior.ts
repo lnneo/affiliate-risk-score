@@ -47,6 +47,7 @@ export async function evaluateBehaviorRules(
         metadata: {
           ordersLast10Min: ipVelocity?.count || 0,
           clicksLast5Min: clickVelocity?.count || 0,
+          ip: order.ip,
         },
       });
     }

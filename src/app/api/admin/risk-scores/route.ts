@@ -60,10 +60,15 @@ export async function GET(req: Request) {
       );
       return {
         ...score,
-        signals: rawSignals.map((s) => ({
-          ...s,
-          metadata: s.metadata_json ? JSON.parse(s.metadata_json) : null,
-        })),
+        signals: rawSignals.map((s) => {
+          const metadata = s.metadata_json ? JSON.parse(s.metadata_json) : null;
+          return {
+            ...s,
+            metadata,
+            reasonKey: metadata?.reasonKey,
+            reasonParams: metadata?.reasonParams,
+          };
+        }),
       };
     }));
 
