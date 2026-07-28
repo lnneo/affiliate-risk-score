@@ -5,6 +5,7 @@ import Navbar from '@/components/Navbar';
 import LoadingButton from '@/components/LoadingButton';
 import TableOverlay from '@/components/TableOverlay';
 import { useI18n } from '@/i18n/I18nProvider';
+import { resolveFraudSignalReason } from '@/i18n/format';
 import type { Dictionary } from '@/i18n/dictionaries/vi';
 import { 
   Filter, 
@@ -315,7 +316,9 @@ export default function AdminDashboardPage() {
                             <span className="font-bold text-rose-400 break-all">{sig.signal_type}</span>
                             <span className="font-bold text-rose-400 shrink-0">+{sig.score} {t.dashboard.points}</span>
                           </div>
-                          <p className="text-slate-300 leading-relaxed break-words">{sig.reason}</p>
+                          <p className="text-slate-300 leading-relaxed break-words">
+                            {resolveFraudSignalReason(sig, t.fraudReasons)}
+                          </p>
                           {sig.metadata_json && (
                             <div className="text-[11px] font-mono text-slate-400 pt-1 break-all bg-slate-950/60 p-2 rounded border border-slate-800/80 overflow-x-auto max-w-full">
                               {sig.metadata_json}

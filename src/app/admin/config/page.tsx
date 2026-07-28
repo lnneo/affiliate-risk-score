@@ -284,7 +284,9 @@ export default function AdminConfigPage() {
                   </LoadingButton>
                 </div>
 
-                <p className="text-xs text-slate-400 mb-4 min-h-[32px] leading-relaxed break-words">{rule.description}</p>
+                <p className="text-xs text-slate-400 mb-4 min-h-[32px] leading-relaxed break-words">
+                  {t.ruleDescriptions[rule.rule_type] ?? rule.description}
+                </p>
 
                 <div className="flex items-center justify-between gap-4 pt-2">
                   <div className="flex-1 space-y-1 min-w-0">

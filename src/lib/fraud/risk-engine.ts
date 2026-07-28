@@ -1,4 +1,5 @@
 import { execute, queryMany, queryOne } from '../db';
+import { fraudSignalPersistMetadata } from '../../i18n/format';
 import { evaluateIdentityRules } from './rules/identity';
 import { evaluateNetworkRules } from './rules/network';
 import { evaluateBehaviorRules } from './rules/behavior';
@@ -101,6 +102,7 @@ export async function evaluateOrderRisk(order: OrderContext): Promise<RiskEvalua
 
   // 7. Persist individual signals (Explainable Audit Log)
   for (const sig of allSignals) {
+    const persistMeta = fraudSignalPersistMetadata(sig);
     await execute(
       `
         INSERT INTO affiliate_risk_signals (id, risk_score_id, signal_type, score, reason, metadata_json, created_at)
@@ -112,7 +114,7 @@ export async function evaluateOrderRisk(order: OrderContext): Promise<RiskEvalua
         sig.type,
         sig.score,
         sig.reason,
-        sig.metadata ? JSON.stringify(sig.metadata) : null,
+        persistMeta ? JSON.stringify(persistMeta) : null,
       ],
     );
   }

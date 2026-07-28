@@ -277,6 +277,7 @@ export type Dictionary = {
     clickInflationNoConversion: string;
     duplicateConversion: string;
   };
+  ruleDescriptions: Record<string, string>;
   refLanding: {
     loadingTitle: string;
     loadingBody: string;
@@ -666,6 +667,23 @@ export const vi: Dictionary = {
     clickInflationNoConversion:
       'Affiliate tạo ra {clicks24h} lượt click trong 24h nhưng tỷ lệ chuyển đổi = 0% (Spam CTR ảo)',
     duplicateConversion: 'Mã khách hàng/đơn hàng ({externalCustomerId}) đã được ghi nhận hoa hồng trước đó',
+  },
+  ruleDescriptions: {
+    SELF_REFERRAL: 'Email affiliate trùng email hoặc tài khoản người mua',
+    SAME_PAYMENT_ACCOUNT: 'Người mua dùng tài khoản thanh toán của affiliate',
+    SAME_COOKIE: 'Cookie người mua khớp phiên tạo affiliate',
+    SAME_FINGERPRINT: 'Vân tay thiết bị người mua khớp thiết bị affiliate',
+    SAME_IP: 'IP người mua khớp IP click của affiliate',
+    DISPOSABLE_EMAIL: 'Người mua dùng email tạm thời/rác',
+    VPN_USAGE: 'IP mua hoặc click được phát hiện là VPN thương mại',
+    PROXY_USAGE: 'IP mua hoặc click được phát hiện là proxy',
+    DATACENTER_IP: 'Traffic đến từ nhà cung cấp hosting datacenter',
+    VELOCITY_EXCEEDED: 'Tần suất mua hoặc click cao trong thời gian ngắn',
+    IP_BLACKLISTED: 'IP nằm trong danh sách đen bảo mật',
+    REFERRER_SPAM_OR_CLOAKED: 'URL referrer bị blacklist, cloaking hoặc đáng ngờ',
+    SUSPICIOUS_GEOLOCATION: 'Traffic đến từ quốc gia rủi ro cao hoặc ngoài thị trường mục tiêu',
+    CLICK_INFLATION_NO_CONVERSION: 'Affiliate có nhiều click nhưng tỷ lệ chuyển đổi bất thường thấp',
+    DUPLICATE_CONVERSION: 'Trùng customer ID hoặc transaction ID để nhận hoa hồng nhiều lần',
   },
   refLanding: {
     loadingTitle: 'Đang Thu thập Fingerprint Thật...',
